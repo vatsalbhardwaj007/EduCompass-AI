@@ -9,10 +9,8 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
 import { useProfile } from "@/lib/ProfileContext";
+import EduCompassLogo from "@/components/EduCompassLogo";
 import {
   StudentProfile, Category, CareerGoal,
   INDIAN_STATES, ENGINEERING_BRANCHES, CAREER_GOAL_LABELS,
@@ -145,16 +143,18 @@ export default function ProfilePage() {
                 </div>
                 <div className="space-y-2">
                   <Label className="text-xs font-semibold" style={{ color: "#888888" }}>Reservation Category</Label>
-                  <Select value={category} onValueChange={(v) => setCategory(v as Category)}>
-                    <SelectTrigger className={selectTriggerCls}><SelectValue /></SelectTrigger>
-                    <SelectContent className="bg-[#111111] border-[rgba(255,255,255,0.1)] text-white">
-                      <SelectItem value="general">General (OPEN)</SelectItem>
-                      <SelectItem value="obc">OBC-NCL</SelectItem>
-                      <SelectItem value="sc">Scheduled Caste (SC)</SelectItem>
-                      <SelectItem value="st">Scheduled Tribe (ST)</SelectItem>
-                      <SelectItem value="ews">Gen-EWS</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <select
+                    id="category"
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value as Category)}
+                    className="w-full bg-[#1a1a1a] border border-[rgba(255,255,255,0.08)] text-white h-11 rounded-xl px-3.5 text-sm outline-none focus:border-[rgba(255,255,255,0.35)] cursor-pointer"
+                  >
+                    <option value="general" className="bg-[#111111] text-white">General (OPEN)</option>
+                    <option value="obc" className="bg-[#111111] text-white">OBC-NCL</option>
+                    <option value="sc" className="bg-[#111111] text-white">Scheduled Caste (SC)</option>
+                    <option value="st" className="bg-[#111111] text-white">Scheduled Tribe (ST)</option>
+                    <option value="ews" className="bg-[#111111] text-white">Gen-EWS</option>
+                  </select>
                 </div>
               </div>
             </FormSection>
@@ -166,23 +166,32 @@ export default function ProfilePage() {
               <div className="grid gap-5 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label className="text-xs font-semibold" style={{ color: "#888888" }}>Gender</Label>
-                  <Select value={gender} onValueChange={(v) => setGender(v as any)}>
-                    <SelectTrigger className={selectTriggerCls}><SelectValue /></SelectTrigger>
-                    <SelectContent className="bg-[#111111] border-[rgba(255,255,255,0.1)] text-white">
-                      <SelectItem value="male">Male</SelectItem>
-                      <SelectItem value="female">Female (Supernumerary Quota)</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <select
+                    id="gender"
+                    value={gender}
+                    onChange={(e) => setGender(e.target.value as any)}
+                    className="w-full bg-[#1a1a1a] border border-[rgba(255,255,255,0.08)] text-white h-11 rounded-xl px-3.5 text-sm outline-none focus:border-[rgba(255,255,255,0.35)] cursor-pointer"
+                  >
+                    <option value="male" className="bg-[#111111] text-white">Male</option>
+                    <option value="female" className="bg-[#111111] text-white">Female (Supernumerary Quota)</option>
+                    <option value="other" className="bg-[#111111] text-white">Other</option>
+                  </select>
                 </div>
                 <div className="space-y-2">
                   <Label className="text-xs font-semibold" style={{ color: "#888888" }}>Home Domicile State</Label>
-                  <Select value={homeState} onValueChange={(val) => { if (val) setHomeState(val); }}>
-                    <SelectTrigger className={selectTriggerCls}><SelectValue placeholder="Select state" /></SelectTrigger>
-                    <SelectContent className="bg-[#111111] border-[rgba(255,255,255,0.1)] text-white max-h-60">
-                      {INDIAN_STATES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
+                  <select
+                    id="homeState"
+                    value={homeState}
+                    onChange={(e) => setHomeState(e.target.value)}
+                    className="w-full bg-[#1a1a1a] border border-[rgba(255,255,255,0.08)] text-white h-11 rounded-xl px-3.5 text-sm outline-none focus:border-[rgba(255,255,255,0.35)] cursor-pointer"
+                  >
+                    <option value="" disabled className="bg-[#111111] text-gray-500">Select state</option>
+                    {INDIAN_STATES.map((s) => (
+                      <option key={s} value={s} className="bg-[#111111] text-white">
+                        {s}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
             </FormSection>

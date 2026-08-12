@@ -248,154 +248,10 @@ function WeightTunerModal({
   );
 }
 
-/* ── Chat Panel ── */
-interface ChatMessage { role: "user" | "assistant"; content: string; }
-
-function ChatPanel({ recommendations, isOpen, onClose }: { recommendations: RecommendedCollege[]; isOpen: boolean; onClose: () => void; }) {
-  const [messages, setMessages] = useState<ChatMessage[]>([{
-    role: "assistant",
-    content: "👋 Welcome! I am your AI admission counsellor. Ask me anything about your matched colleges. Try tapping a suggested question below!",
-  }]);
-  const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  const chips = [
-    "Why is #1 ranked higher than #2?",
-    "Which college offers the best ROI?",
-    "Which option has the best coding culture?",
-    "Is my rank safe for the top match?",
-  ];
-
-  const sendMessage = async (custom?: string) => {
-    const text = custom || input;
-    if (!text.trim() || loading) return;
-    setInput("");
-    setMessages((p) => [...p, { role: "user", content: text }]);
-    setLoading(true);
-    try {
-      const res = await fetch("/api/counsellor", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          question: text,
-          colleges: recommendations.slice(0, 10).map((r, i) => ({
-            rank: i + 1, name: r.college.name, type: r.college.type, city: r.college.city,
-            branch: r.matchedBranch.name, overallScore: r.overallScore, fees: r.college.fees,
-            avgPackageLPA: r.college.avgPackageLPA, hostelRating: r.college.hostelRating,
-            codingCultureRating: r.college.codingCultureRating, placementRating: r.college.placementRating,
-            breakdown: r.breakdown, topReasons: r.topReasons,
-          })),
-        }),
-      });
-      const data = await res.json();
-      setMessages((p) => [...p, { role: "assistant", content: data.answer || "Sorry, couldn't generate a response." }]);
-    } catch {
-      setMessages((p) => [...p, { role: "assistant", content: "Sorry, there was an error. Please check your API key." }]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed bottom-0 right-0 w-full sm:w-[440px] sm:bottom-6 sm:right-6 z-50">
-      <div className="glass-card flex flex-col rounded-none sm:rounded-2xl overflow-hidden" style={{ height: "520px", boxShadow: "0 32px 80px -12px rgba(0,0,0,0.9)" }}>
-        {/* Header */}
-        <div className="p-4 flex items-center justify-between" style={{ borderBottom: "1px solid rgba(255,255,255,0.07)", background: "rgba(10,10,10,0.7)" }}>
-          <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-xl flex items-center justify-center" style={{ background: "#ffffff", boxShadow: "0 0 16px -4px rgba(255,255,255,0.25)" }}>
-              <Bot className="h-5 w-5 text-black" />
-            </div>
-            <div>
-              <div className="font-bold text-sm text-white">AI Admission Counsellor</div>
-              <div className="text-[10px] font-semibold flex items-center gap-1" style={{ color: "#888888" }}>
-                <span className="h-1.5 w-1.5 rounded-full bg-white inline-block animate-pulse-glow" />
-                Grounded on Your Results
-              </div>
-            </div>
-          </div>
-          <button onClick={onClose} className="h-7 w-7 rounded-lg flex items-center justify-center cursor-pointer" style={{ color: "#666666" }}>
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-
-        {/* Messages */}
-        <ScrollArea className="flex-1 p-4">
-          <div className="space-y-3">
-            {messages.map((m, i) => (
-              <div key={i} className={`flex gap-2.5 ${m.role === "user" ? "justify-end" : "justify-start"}`}>
-                {m.role === "assistant" && (
-                  <div className="h-7 w-7 rounded-lg flex items-center justify-center shrink-0 mt-1" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}>
-                    <Bot className="h-3.5 w-3.5 text-white" />
-                  </div>
-                )}
-                <div
-                  className={`max-w-[82%] px-4 py-2.5 text-xs leading-relaxed ${m.role === "user" ? "chat-bubble-user" : "chat-bubble-ai"}`}
-                  style={{ color: m.role === "assistant" ? "#888888" : "#0a0a0a" }}
-                >
-                  {m.content}
-                </div>
-                {m.role === "user" && (
-                  <div className="h-7 w-7 rounded-lg flex items-center justify-center shrink-0 mt-1" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}>
-                    <User className="h-3.5 w-3.5 text-white" />
-                  </div>
-                )}
-              </div>
-            ))}
-            {loading && (
-              <div className="flex gap-2.5 justify-start">
-                <div className="h-7 w-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}>
-                  <Bot className="h-3.5 w-3.5 text-white" />
-                </div>
-                <div className="chat-bubble-ai px-4 py-2.5 flex items-center gap-2 text-xs" style={{ color: "#888888" }}>
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" /> Analyzing matched colleges…
-                </div>
-              </div>
-            )}
-          </div>
-        </ScrollArea>
-
-        {/* Chips */}
-        <div className="px-4 py-2 flex gap-1.5 overflow-x-auto" style={{ borderTop: "1px solid rgba(255,255,255,0.07)", background: "rgba(10,10,10,0.5)" }}>
-          {chips.map((chip) => (
-            <button
-              key={chip} onClick={() => sendMessage(chip)}
-              className="text-[10px] whitespace-nowrap px-2.5 py-1 rounded-full border cursor-pointer shrink-0 transition-all"
-              style={{ background: "#1a1a1a", borderColor: "rgba(255,255,255,0.08)", color: "#777777" }}
-              onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.25)"; e.currentTarget.style.color = "#ffffff"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"; e.currentTarget.style.color = "#777777"; }}
-            >
-              {chip}
-            </button>
-          ))}
-        </div>
-
-        {/* Input */}
-        <div className="p-3 flex gap-2" style={{ borderTop: "1px solid rgba(255,255,255,0.07)", background: "rgba(10,10,10,0.7)" }}>
-          <Input
-            value={input} onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); sendMessage(); } }}
-            placeholder="Ask AI Counsellor…"
-            className="bg-[#1a1a1a] border-[rgba(255,255,255,0.08)] text-xs text-white h-10 rounded-xl placeholder:text-[#444]"
-          />
-          <button
-            onClick={() => sendMessage()} disabled={!input.trim() || loading}
-            className="btn-accent h-10 w-10 rounded-xl flex items-center justify-center shrink-0 cursor-pointer"
-          >
-            <Send className="h-4 w-4 text-black" />
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 /* ── Main Dashboard ── */
 export default function DashboardPage() {
   const router = useRouter();
   const { profile, recommendations, selectedCollegeIds, toggleCollegeSelection, clearSelections, weights, setWeights } = useProfile();
-  const [chatOpen, setChatOpen] = useState(false);
   const [weightModalOpen, setWeightModalOpen] = useState(false);
   const [detailCollege, setDetailCollege] = useState<RecommendedCollege | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -613,20 +469,6 @@ export default function DashboardPage() {
         )}
       </div>
 
-      {/* AI FAB */}
-      {!chatOpen && (
-        <button
-          onClick={() => setChatOpen(true)}
-          className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-2xl flex items-center justify-center cursor-pointer transition-all duration-300 hover:scale-105"
-          style={{ background: "#ffffff", boxShadow: "0 8px 32px -6px rgba(255,255,255,0.2)" }}
-          aria-label="Open AI Counsellor"
-        >
-          <MessageSquareText className="h-6 w-6 text-black" />
-          <span className="absolute -top-1 -right-1 h-3.5 w-3.5 rounded-full border-2 border-[#0a0a0a] bg-white" />
-        </button>
-      )}
-
-      <ChatPanel recommendations={filteredRecs} isOpen={chatOpen} onClose={() => setChatOpen(false)} />
       <WeightTunerModal isOpen={weightModalOpen} onClose={() => setWeightModalOpen(false)} weights={weights} onSave={setWeights} />
       <CollegeDetailModal rec={detailCollege} onClose={() => setDetailCollege(null)} />
     </div>

@@ -647,4 +647,117 @@ body.logo-animation-done > div:not(.logo-anim-overlay) {
   .logo-anim-cursor { display: none !important; }
   body.logo-anim-active { overflow: auto !important; }
   body > div { opacity: 1 !important; transform: none !important; }
+  .chatbot-panel-enter { animation: none !important; }
+  .chatbot-msg-enter { animation: none !important; opacity: 1 !important; }
+  .chatbot-fab-pulse { display: none !important; }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   AI CHATBOT ANIMATIONS
+   ═══════════════════════════════════════════════════════════ */
+
+/* Panel slide-up entrance */
+.chatbot-panel-enter {
+  animation: chatbot-slide-up 0.35s var(--ease-out-smooth) forwards;
+}
+
+@keyframes chatbot-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Message fade-in */
+.chatbot-msg-enter {
+  animation: chatbot-msg-fade 0.3s var(--ease-out-smooth) both;
+}
+
+@keyframes chatbot-msg-fade {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Streaming cursor blink */
+.chatbot-cursor {
+  display: inline-block;
+  width: 6px;
+  height: 14px;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 1px;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  animation: chatbot-cursor-blink 0.8s ease-in-out infinite;
+}
+
+@keyframes chatbot-cursor-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.15; }
+}
+
+/* FAB pulse glow ring */
+.chatbot-fab-pulse {
+  pointer-events: none;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  animation: chatbot-pulse-ring 2.5s ease-out infinite;
+}
+
+@keyframes chatbot-pulse-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  70% {
+    transform: scale(1.35);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.35);
+    opacity: 0;
+  }
+}
+
+/* FAB hover glow */
+.chatbot-fab {
+  transition: transform 0.3s var(--ease-out-smooth), box-shadow 0.3s var(--ease-out-smooth);
+}
+
+.chatbot-fab:hover {
+  box-shadow: 0 8px 40px -4px rgba(255, 255, 255, 0.35),
+              0 0 0 1px rgba(255, 255, 255, 0.15) !important;
+}
+
+/* Chatbot icon glow */
+.chatbot-icon-glow {
+  box-shadow: 0 0 30px -8px rgba(255, 255, 255, 0.15);
+}
+
+/* Chip hover effect */
+.chatbot-chip {
+  transition: all 0.2s var(--ease-out-smooth);
+}
+
+.chatbot-chip:hover {
+  border-color: rgba(255, 255, 255, 0.22) !important;
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+}
+
+/* Chips bar scrollbar hide */
+.chatbot-chips-bar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.chatbot-chips-bar::-webkit-scrollbar {
+  display: none;
 }

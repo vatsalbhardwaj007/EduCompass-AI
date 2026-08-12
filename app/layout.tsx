@@ -7,6 +7,7 @@ import {
 } from "next/font/google";
 import "./globals.css";
 import { ProfileProvider } from "@/lib/ProfileContext";
+import AIChatbot from "@/components/AIChatbot";
 import ScrollRevealInit from "@/lib/ScrollRevealInit";
 import LogoAnimation from "@/lib/LogoAnimation";
 
@@ -56,7 +57,10 @@ export default function RootLayout({
         style={{ backgroundColor: "var(--bg-page)", color: "var(--text-primary)" }}
         suppressHydrationWarning
       >
-        <ProfileProvider>{children}</ProfileProvider>
+        <ProfileProvider>
+          {children}
+          <AIChatbot />
+        </ProfileProvider>
 
         {/* Scroll reveal: wakes up .reveal-on-scroll elements as they enter viewport */}
         <ScrollRevealInit />
