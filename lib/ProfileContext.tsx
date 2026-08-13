@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useCallback } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import {
   StudentProfile,
   RecommendedCollege,
@@ -24,9 +24,36 @@ interface ProfileContextType {
 
 const ProfileContext = createContext<ProfileContextType | undefined>(undefined);
 
+const DEFAULT_DEMO_PROFILE: StudentProfile = {
+  jeeMainRank: 5000,
+  jeeAdvancedRank: 500,
+  category: "general",
+  gender: "male",
+  homeState: "Delhi",
+  budget: 1500000,
+  hostelNeeded: true,
+  preferredBranches: [],
+  careerGoal: "high_package",
+};
+
+const getInitialProfile = (): StudentProfile => {
+  if (typeof window === "undefined") return DEFAULT_DEMO_PROFILE;
+  try {
+    const saved = localStorage.getItem("educompass_profile");
+    if (saved) {
+      return JSON.parse(saved) as StudentProfile;
+    }
+  } catch {
+    // fallback
+  }
+  return DEFAULT_DEMO_PROFILE;
+};
+
 export function ProfileProvider({ children }: { children: React.ReactNode }) {
-  const [profile, setProfileState] = useState<StudentProfile | null>(null);
-  const [recommendations, setRecommendations] = useState<RecommendedCollege[]>([]);
+  const [profile, setProfileState] = useState<StudentProfile>(getInitialProfile);
+  const [recommendations, setRecommendations] = useState<RecommendedCollege[]>(() => 
+    getRecommendations(getInitialProfile(), colleges, DEFAULT_WEIGHTS)
+  );
   const [selectedCollegeIds, setSelectedCollegeIds] = useState<string[]>([]);
   const [weights, setWeightsState] = useState<ScoringWeights>(DEFAULT_WEIGHTS);
 
@@ -38,9 +65,21 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
     []
   );
 
+  // Sync profile & recommendations on mount / change
+  useEffect(() => {
+    const initial = getInitialProfile();
+    setProfileState(initial);
+    calculateRecommendations(initial, weights);
+  }, [calculateRecommendations, weights]);
+
   const setProfile = useCallback(
     (p: StudentProfile) => {
       setProfileState(p);
+      try {
+        localStorage.setItem("educompass_profile", JSON.stringify(p));
+      } catch {
+        // ignore quota errors
+      }
       calculateRecommendations(p, weights);
     },
     [weights, calculateRecommendations]

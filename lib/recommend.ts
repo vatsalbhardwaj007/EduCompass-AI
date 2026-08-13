@@ -21,8 +21,10 @@ import {
 // ── Helpers ──────────────────────────────────────────────────
 
 /** Get the closing rank for the student's category */
-function getCategoryRank(branch: Branch, category: Category): number {
-  return branch.closingRank[category];
+function getCategoryRank(branch: Branch, category?: Category): number {
+  if (!branch || !branch.closingRank) return 100000;
+  const key = (category?.toLowerCase() || "general") as keyof typeof branch.closingRank;
+  return branch.closingRank[key] ?? branch.closingRank.general ?? 100000;
 }
 
 /** Clamp a number between 0 and 100 */
@@ -211,12 +213,17 @@ function generateTopReasons(
 
   if (breakdown.admissionSafety >= 70) {
     reasons.push({
-      text: `Safe admission — your rank is well within the cutoff for ${branch.name}`,
+      text: `Safe admission — your rank is well within closing rank (#${getCategoryRank(branch, profile.category)}) for ${branch.name}`,
       score: breakdown.admissionSafety,
     });
-  } else if (breakdown.admissionSafety >= 40) {
+  } else if (breakdown.admissionSafety >= 35) {
     reasons.push({
-      text: `Moderate admission chance for ${branch.name}`,
+      text: `Moderate match chance — rank is near historic cutoffs for ${branch.name}`,
+      score: breakdown.admissionSafety,
+    });
+  } else {
+    reasons.push({
+      text: `Ambitious Reach — rank is higher than historic cutoffs in sample dataset`,
       score: breakdown.admissionSafety,
     });
   }
@@ -274,84 +281,85 @@ function generateTopReasons(
 // ── Main Recommendation Function ─────────────────────────────
 
 /**
- * Pure, deterministic function that:
- * 1. Filters colleges by eligibility (rank + budget)
- * 2. Scores each college-branch combo on 6 factors
- * 3. Returns sorted recommendations with breakdown
- *
- * NO side effects. NO AI/LLM calls.
+ * Multi-pass recommendation engine:
+ * Pass 1: Strict match (rank <= cutoff * 1.35, within budget tolerance)
+ * Pass 2: Fallback match (relaxed rank/budget) if Pass 1 yields < 5 results
  */
 export function getRecommendations(
   profile: StudentProfile,
   colleges: College[],
   weights: ScoringWeights = DEFAULT_WEIGHTS
 ): RecommendedCollege[] {
-  const results: RecommendedCollege[] = [];
+  const computeMatches = (rankMultiplier: number, budgetMultiplier: number): RecommendedCollege[] => {
+    const results: RecommendedCollege[] = [];
 
-  for (const college of colleges) {
-    // Determine rank for this college type
-    const isIIT = college.type === "IIT";
-    if (isIIT && (!profile.jeeAdvancedRank || profile.jeeAdvancedRank <= 0)) {
-      // Exclude IIT if student has no JEE Advanced rank
-      continue;
-    }
+    for (const college of colleges) {
+      const isIIT = college.type === "IIT";
+      if (isIIT && (!profile.jeeAdvancedRank || profile.jeeAdvancedRank <= 0)) {
+        continue;
+      }
 
-    const studentRank = isIIT
-      ? (profile.jeeAdvancedRank as number)
-      : profile.jeeMainRank;
+      const studentRank = isIIT
+        ? (profile.jeeAdvancedRank as number)
+        : profile.jeeMainRank;
 
-    if (!studentRank || studentRank <= 0) continue;
+      if (!studentRank || studentRank <= 0) continue;
 
-    // Budget filter
-    if (!isWithinBudget(college.fees, profile.budget)) continue;
+      // Budget filter with multiplier
+      if (!isWithinBudget(college.fees, profile.budget * budgetMultiplier)) continue;
 
-    // Find the best eligible branch for this college
-    let bestMatch: { branch: Branch; score: number; breakdown: ScoreBreakdown } | null = null;
+      let bestMatch: { branch: Branch; score: number; breakdown: ScoreBreakdown } | null = null;
 
-    for (const branch of college.branches) {
-      // Eligibility filter
-      if (!isEligibleForBranch(studentRank, branch, profile.category)) continue;
+      for (const branch of college.branches) {
+        const cutoff = getCategoryRank(branch, profile.category);
+        if (studentRank > cutoff * rankMultiplier) continue;
 
-      // Calculate individual factor scores
-      const breakdown: ScoreBreakdown = {
-        admissionSafety: scoreAdmissionSafety(studentRank, branch, profile.category),
-        roi: scoreROI(college.avgPackageLPA, college.fees),
-        branchMatch: scoreBranchMatch(branch, profile.preferredBranches, profile.careerGoal),
-        placement: scorePlacement(college.placementRating, college.avgPackageLPA, profile.careerGoal),
-        hostel: scoreHostel(college.hostelRating, profile.hostelNeeded),
-        codingCulture: scoreCodingCulture(college.codingCultureRating, profile.careerGoal),
-      };
+        const breakdown: ScoreBreakdown = {
+          admissionSafety: scoreAdmissionSafety(studentRank, branch, profile.category),
+          roi: scoreROI(college.avgPackageLPA, college.fees),
+          branchMatch: scoreBranchMatch(branch, profile.preferredBranches, profile.careerGoal),
+          placement: scorePlacement(college.placementRating, college.avgPackageLPA, profile.careerGoal),
+          hostel: scoreHostel(college.hostelRating, profile.hostelNeeded),
+          codingCulture: scoreCodingCulture(college.codingCultureRating, profile.careerGoal),
+        };
 
-      // Weighted overall score
-      const overallScore =
-        breakdown.admissionSafety * weights.admissionSafety +
-        breakdown.roi * weights.roi +
-        breakdown.branchMatch * weights.branchMatch +
-        breakdown.placement * weights.placement +
-        breakdown.hostel * weights.hostel +
-        breakdown.codingCulture * weights.codingCulture;
+        const overallScore =
+          breakdown.admissionSafety * weights.admissionSafety +
+          breakdown.roi * weights.roi +
+          breakdown.branchMatch * weights.branchMatch +
+          breakdown.placement * weights.placement +
+          breakdown.hostel * weights.hostel +
+          breakdown.codingCulture * weights.codingCulture;
 
-      if (!bestMatch || overallScore > bestMatch.score) {
-        bestMatch = { branch, score: overallScore, breakdown };
+        if (!bestMatch || overallScore > bestMatch.score) {
+          bestMatch = { branch, score: overallScore, breakdown };
+        }
+      }
+
+      if (bestMatch) {
+        results.push({
+          college,
+          matchedBranch: bestMatch.branch,
+          overallScore: Math.round(bestMatch.score * 10) / 10,
+          breakdown: bestMatch.breakdown,
+          topReasons: generateTopReasons(
+            college,
+            bestMatch.branch,
+            bestMatch.breakdown,
+            profile
+          ),
+        });
       }
     }
 
-    if (bestMatch) {
-      results.push({
-        college,
-        matchedBranch: bestMatch.branch,
-        overallScore: Math.round(bestMatch.score * 10) / 10,
-        breakdown: bestMatch.breakdown,
-        topReasons: generateTopReasons(
-          college,
-          bestMatch.branch,
-          bestMatch.breakdown,
-          profile
-        ),
-      });
-    }
-  }
+    return results.sort((a, b) => b.overallScore - a.overallScore);
+  };
 
-  // Sort by overall score descending
-  return results.sort((a, b) => b.overallScore - a.overallScore);
+  // Pass 1: Standard match (up to 35% buffer over closing rank)
+  const pass1 = computeMatches(1.35, 1.1);
+  if (pass1.length >= 3) return pass1;
+
+  // Pass 2: Relaxed fallback (up to 10x rank multiplier & 2x budget) so user always gets matches
+  const pass2 = computeMatches(10.0, 2.0);
+  return pass2;
 }

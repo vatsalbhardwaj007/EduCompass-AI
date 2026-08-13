@@ -45,11 +45,11 @@ export default function ProfilePage() {
   const router = useRouter();
   const { setProfile, profile: existingProfile } = useProfile();
 
-  const [jeeMainRank, setJeeMainRank] = useState(existingProfile?.jeeMainRank ? String(existingProfile.jeeMainRank) : "");
-  const [jeeAdvancedRank, setJeeAdvancedRank] = useState(existingProfile?.jeeAdvancedRank ? String(existingProfile.jeeAdvancedRank) : "");
+  const [jeeMainRank, setJeeMainRank] = useState(existingProfile?.jeeMainRank ? String(existingProfile.jeeMainRank) : "5000");
+  const [jeeAdvancedRank, setJeeAdvancedRank] = useState(existingProfile?.jeeAdvancedRank ? String(existingProfile.jeeAdvancedRank) : "500");
   const [category, setCategory] = useState<Category>(existingProfile?.category || "general");
   const [gender, setGender] = useState<"male" | "female" | "other">(existingProfile?.gender || "male");
-  const [homeState, setHomeState] = useState(existingProfile?.homeState || "");
+  const [homeState, setHomeState] = useState(existingProfile?.homeState || "Delhi");
   const [budget, setBudget] = useState(existingProfile?.budget ? String(existingProfile.budget) : "1200000");
   const [hostelNeeded, setHostelNeeded] = useState(existingProfile?.hostelNeeded !== undefined ? existingProfile.hostelNeeded : true);
   const [preferredBranches, setPreferredBranches] = useState<string[]>(existingProfile?.preferredBranches || []);
