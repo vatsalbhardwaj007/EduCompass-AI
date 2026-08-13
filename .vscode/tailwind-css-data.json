@@ -1,0 +1,26 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vscode-css-languageservice/main/docs/customData.schema.json",
+  "version": 1.1,
+  "atDirectives": [
+    {
+      "name": "@custom-variant",
+      "description": "Tailwind CSS v4 custom variant definition"
+    },
+    {
+      "name": "@theme",
+      "description": "Tailwind CSS v4 theme inline configuration"
+    },
+    {
+      "name": "@utility",
+      "description": "Tailwind CSS v4 custom utility directive"
+    },
+    {
+      "name": "@variant",
+      "description": "Tailwind CSS v4 custom variant directive"
+    },
+    {
+      "name": "@apply",
+      "description": "Tailwind CSS utility application directive"
+    }
+  ]
+}
