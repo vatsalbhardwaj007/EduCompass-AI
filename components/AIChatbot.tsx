@@ -433,8 +433,8 @@ export default function AIChatbot() {
                       }}
                     />
                     {hasProfile
-                      ? "Personalised • Llama 3.3"
-                      : "General Mode • Llama 3.3"}
+                      ? "Personalised • GPT-OSS"
+                      : "General Mode • GPT-OSS"}
                   </div>
                 </div>
               </div>

@@ -48,7 +48,7 @@ const features = [
     title: "Grounded AI Counsellor",
     description:
       "Chat with an AI counsellor trained strictly on your matched dataset. Get honest answers without fake numbers or fluff.",
-    badge: "Llama 3.3 Powered",
+    badge: "GPT-OSS Powered",
   },
 ];
 
@@ -191,14 +191,14 @@ export default function LandingPage() {
                 ════════════════════════════════ */}
                 <div style={{
                   position: "relative",
-                  background: "linear-gradient(155deg, #5c5c60 0%, #4a4a4e 15%, #3e3e42 40%, #363638 70%, #2e2e30 100%)",
-                  borderRadius: "18px 18px 5px 5px",
-                  padding: "3px 3px 0 3px",
+                  background: "linear-gradient(155deg, #6e6e73 0%, #59595d 14%, #4c4c50 38%, #414144 72%, #38383b 100%)",
+                  borderRadius: "22px 22px 6px 6px",
+                  padding: "4px 4px 0 4px",
                   boxShadow:
-                    "inset 0 1px 0 rgba(255,255,255,0.18)," +
-                    "inset 1px 0 0 rgba(255,255,255,0.07)," +
-                    "inset -1px 0 0 rgba(0,0,0,0.25)," +
-                    "0 -2px 6px rgba(0,0,0,0.5)",
+                    "inset 0 1px 0 rgba(255,255,255,0.25)," +
+                    "inset 1px 0 0 rgba(255,255,255,0.08)," +
+                    "inset -1px 0 0 rgba(0,0,0,0.3)," +
+                    "0 -2px 8px rgba(0,0,0,0.55)",
                 }}>
 
                   {/* Lid bottom edge — thin aluminum strip before hinge */}
@@ -212,9 +212,9 @@ export default function LandingPage() {
 
                   {/* Screen inner bezel */}
                   <div style={{
-                    background: "#141416",
-                    borderRadius: "16px 16px 3px 3px",
-                    padding: "13px 7px 7px",
+                    background: "#0b0b0c",
+                    borderRadius: "19px 19px 5px 5px",
+                    padding: "18px 14px 15px",
                     position: "relative",
                     overflow: "hidden",
                   }}>
@@ -224,9 +224,9 @@ export default function LandingPage() {
                       position: "absolute",
                       top: 0, left: "50%",
                       transform: "translateX(-50%)",
-                      width: 62, height: 12,
-                      background: "#141416",
-                      borderRadius: "0 0 10px 10px",
+                      width: 84, height: 20,
+                      background: "#0b0b0c",
+                      borderRadius: "0 0 12px 12px",
                       zIndex: 20,
                       display: "flex",
                       alignItems: "center",
@@ -234,20 +234,20 @@ export default function LandingPage() {
                     }}>
                       {/* Camera */}
                       <div style={{
-                        width: 5, height: 5, borderRadius: "50%",
-                        background: "#0d0d0f",
-                        boxShadow: "0 0 0 1px rgba(255,255,255,0.07), inset 0 0 3px rgba(255,255,255,0.12)",
+                        width: 6, height: 6, borderRadius: "50%",
+                        background: "#050508",
+                        boxShadow: "0 0 0 1px rgba(255,255,255,0.08), inset 0 0 4px rgba(130,180,255,0.35)",
                       }} />
                     </div>
 
                     {/* ── DISPLAY ── */}
                     <div style={{
-                      borderRadius: "10px",
+                      borderRadius: "9px",
                       overflow: "hidden",
-                      aspectRatio: "16/10",
-                      background: "#090909",
+                      aspectRatio: "16/11",
+                      background: "#080809",
                       position: "relative",
-                      boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.05), 0 0 40px rgba(255,255,255,0.02) inset",
+                      boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.05), 0 0 46px rgba(255,255,255,0.03) inset",
                     }}>
 
                       {/* Screen glow */}
@@ -335,10 +335,11 @@ export default function LandingPage() {
                     HINGE
                 ════════════════════════════════ */}
                 <div style={{
-                  height: 7,
-                  marginLeft: 10, marginRight: 10,
-                  background: "linear-gradient(180deg, #0a0a0a 0%, #181818 50%, #222224 100%)",
-                  boxShadow: "0 2px 14px rgba(0,0,0,1), inset 0 1px 0 rgba(255,255,255,0.04)",
+                  height: 8,
+                  marginLeft: 12, marginRight: 12,
+                  background: "linear-gradient(180deg, #0a0a0a 0%, #212124 45%, #2f2f32 100%)",
+                  borderRadius: 2,
+                  boxShadow: "0 3px 18px rgba(0,0,0,1), inset 0 1px 0 rgba(255,255,255,0.05)",
                 }} />
 
                 {/* ════════════════════════════════
@@ -346,14 +347,14 @@ export default function LandingPage() {
                 ════════════════════════════════ */}
                 <div style={{
                   position: "relative",
-                  background: "linear-gradient(170deg, #484849 0%, #404042 20%, #3a3a3c 55%, #333334 80%, #2c2c2e 100%)",
-                  borderRadius: "4px 4px 18px 18px",
-                  padding: "12px 18px 16px",
+                  background: "linear-gradient(170deg, #5d5d61 0%, #4e4e52 22%, #454549 55%, #3a3a3d 82%, #333336 100%)",
+                  borderRadius: "6px 6px 20px 20px",
+                  padding: "10px 20px 18px",
                   boxShadow:
-                    "inset 0 1px 0 rgba(255,255,255,0.1)," +
-                    "inset 0 -1px 0 rgba(0,0,0,0.5)," +
-                    "0 0 0 1px rgba(255,255,255,0.06)," +
-                    "0 10px 50px rgba(0,0,0,0.9)",
+                    "inset 0 1px 0 rgba(255,255,255,0.16)," +
+                    "inset 0 -1px 0 rgba(0,0,0,0.55)," +
+                    "0 0 0 1px rgba(255,255,255,0.07)," +
+                    "0 14px 46px rgba(0,0,0,0.85)",
                 }}>
 
                   {/* Left ports (MagSafe + 2× USB-C) */}
@@ -372,76 +373,72 @@ export default function LandingPage() {
                     <div style={{ width: 5, height: 9, background: "linear-gradient(90deg,#181818,#0a0a0a)", borderRadius: "3px 0 0 3px", boxShadow: "inset 0 0 4px rgba(0,0,0,0.8)" }} />
                   </div>
 
-                  {/* ── KEYBOARD — 6 rows, full perspective tilt ── */}
-                  <div style={{ perspective: "500px", perspectiveOrigin: "50% -10%", marginBottom: 10 }}>
-                    <div style={{ transform: "rotateX(22deg)", transformOrigin: "top center", transformStyle: "preserve-3d" }}>
+                  {/* ── KEYBOARD — recessed well, staggered keys ── */}
+                  <div style={{
+                    margin: "2px -2px 12px -2px",
+                    padding: "8px 10px 10px",
+                    background: "linear-gradient(180deg, #171719 0%, #1f1f21 100%)",
+                    borderRadius: 12,
+                    boxShadow: "inset 0 2px 8px rgba(0,0,0,0.85), inset 0 -1px 0 rgba(255,255,255,0.03), 0 1px 0 rgba(255,255,255,0.05)",
+                  }}>
+                    <div style={{ perspective: "700px", perspectiveOrigin: "50% 0%" }}>
+                      <div style={{ transform: "rotateX(9deg)", transformOrigin: "top center", transformStyle: "preserve-3d" }}>
 
-                      {/* fn / function row */}
-                      {(() => {
-                        const fnRow = [1.4, ...Array(12).fill(1), 1.2];
-                        return (
-                          <div style={{ display: "flex", gap: "2px", marginBottom: "3px" }}>
-                            {fnRow.map((w, i) => (
-                              <div key={i} style={{ flex: w, height: 8, position: "relative" }}>
+                        {/* fn / function row */}
+                        {(() => {
+                          const fnRow = [1.3, ...Array(12).fill(1), 1.2];
+                          return (
+                            <div style={{ display: "flex", gap: "3px", marginBottom: "4px" }}>
+                              {fnRow.map((w, i) => (
+                                <div key={i} style={{ flex: w, height: 7, position: "relative" }}>
+                                  <div style={{
+                                    position: "absolute", inset: 0,
+                                    background: i === fnRow.length - 1
+                                      ? "linear-gradient(145deg,#4c4c50,#38383c)"
+                                      : "linear-gradient(145deg,#343437,#28282b)",
+                                    borderRadius: 2.5,
+                                    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.14), inset 0 -1px 0 rgba(0,0,0,0.5), 0 1px 2px rgba(0,0,0,0.55)",
+                                  }}>
+                                    {i === fnRow.length - 1 && (
+                                      <div style={{ position: "absolute", inset: 1, borderRadius: 2, background: "rgba(255,255,255,0.05)", border: "0.5px solid rgba(255,255,255,0.1)" }} />
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          );
+                        })()}
+
+                        {/* Rows 1-5 with diagonal stagger */}
+                        {[
+                          [1.2, 1,1,1,1,1,1,1,1,1,1,1,1, 1.8],
+                          [1.6, 1,1,1,1,1,1,1,1,1,1,1,1, 1.4],
+                          [1.85,1,1,1,1,1,1,1,1,1,1,1, 2.15],
+                          [2.3, 1,1,1,1,1,1,1,1,1,1, 2.5],
+                          [1.5, 1.1,1.1, 3.6, 1.1,1.1,1.35, 1.4],
+                        ].map((row, ri) => (
+                          <div key={ri} style={{ display: "flex", gap: "3px", marginBottom: "3px", paddingLeft: ri * 5 }}>
+                            {row.map((w, ki) => (
+                              <div key={ki} style={{ flex: w, height: 9, position: "relative" }}>
                                 <div style={{
                                   position: "absolute", inset: 0,
-                                  background: i === fnRow.length - 1
-                                    ? "linear-gradient(145deg,#4a4a4e,#38383c)"  // Touch ID
-                                    : "linear-gradient(145deg,#3a3a3c,#2e2e30)",
-                                  borderRadius: 2,
+                                  background: "linear-gradient(150deg, #323235 0%, #2b2b2e 55%, #252528 100%)",
+                                  borderRadius: 2.5,
                                   boxShadow:
-                                    "inset 0 1px 0 rgba(255,255,255,0.12)," +
+                                    "inset 0 1px 0 rgba(255,255,255,0.16)," +
                                     "inset 0 -1px 0 rgba(0,0,0,0.5)," +
-                                    "0 2px 4px rgba(0,0,0,0.6)," +
-                                    "0 0 0 0.5px rgba(255,255,255,0.06)",
+                                    "0 1px 1px rgba(0,0,0,0.5)," +
+                                    "0 0 0 0.5px rgba(255,255,255,0.05)",
                                 }}>
-                                  {i === fnRow.length - 1 && (
-                                    <div style={{ position: "absolute", inset: 1, borderRadius: 1, background: "rgba(255,255,255,0.05)", border: "0.5px solid rgba(255,255,255,0.08)" }} />
+                                  {ri === 4 && ki === 3 && (
+                                    <div style={{ position: "absolute", inset: 0, borderRadius: 2.5, background: "linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01))" }} />
                                   )}
                                 </div>
-                                {/* south wall */}
-                                <div style={{ position: "absolute", bottom: -3, left: 1, right: 1, height: 3, background: "#111", borderRadius: "0 0 2px 2px" }} />
                               </div>
                             ))}
                           </div>
-                        );
-                      })()}
-
-                      {/* Rows 1-5 */}
-                      {[
-                        [1.2, 1,1,1,1,1,1,1,1,1,1,1,1, 1.8],   // ` 1 2 … 0 - = delete
-                        [1.6, 1,1,1,1,1,1,1,1,1,1,1,1, 1.4],   // tab q w … ] \
-                        [1.85,1,1,1,1,1,1,1,1,1,1,1,   2.15],  // caps a s … ; return
-                        [2.3, 1,1,1,1,1,1,1,1,1,1,     2.3],   // shift z x … / shift
-                        [1.3, 1.1,1.1, 4.6, 1.1,1.1,1.1, 1.3], // fn ctrl opt ___space opt cmd
-                      ].map((row, ri) => (
-                        <div key={ri} style={{ display: "flex", gap: "2px", marginBottom: ri < 4 ? "2px" : 0 }}>
-                          {row.map((w, ki) => (
-                            <div key={ki} style={{ flex: w, height: ri === 4 ? 11 : 12, position: "relative" }}>
-                              {/* Key face */}
-                              <div style={{
-                                position: "absolute", inset: 0,
-                                background: "linear-gradient(150deg, #363638 0%, #2e2e30 50%, #282829 100%)",
-                                borderRadius: 2.5,
-                                boxShadow:
-                                  "inset 0 1px 0 rgba(255,255,255,0.13)," +
-                                  "inset 0 -1px 0 rgba(0,0,0,0.55)," +
-                                  "inset 1px 0 0 rgba(255,255,255,0.04)," +
-                                  "0 1px 0 rgba(255,255,255,0.03)," +
-                                  "0 3px 5px rgba(0,0,0,0.65)," +
-                                  "0 0 0 0.5px rgba(255,255,255,0.06)",
-                              }}>
-                                {/* Subtle backlight on space bar */}
-                                {ri === 4 && ki === 3 && (
-                                  <div style={{ position: "absolute", inset: 0, borderRadius: 2.5, background: "rgba(255,255,255,0.02)" }} />
-                                )}
-                              </div>
-                              {/* South wall depth */}
-                              <div style={{ position: "absolute", bottom: -3, left: 1, right: 1, height: 3, background: "linear-gradient(180deg,#141414,#0c0c0c)", borderRadius: "0 0 2px 2px" }} />
-                            </div>
-                          ))}
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
                   </div>
 

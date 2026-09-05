@@ -89,10 +89,10 @@ ${JSON.stringify(colleges.slice(0, 12), null, 2)}
 
     // Stream the response
     const stream = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
+      model: "openai/gpt-oss-120b",
       messages: groqMessages,
       temperature: 0.4,
-      max_tokens: 800,
+      max_tokens: 2048,
       stream: true,
     });
 

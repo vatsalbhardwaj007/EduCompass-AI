@@ -156,6 +156,18 @@ function CollegeDetailModal({ rec, onClose }: { rec: RecommendedCollege | null; 
 }
 
 /* ── Weight Tuner Modal ── */
+function normalizeWeights(weights: ScoringWeights): ScoringWeights {
+  const total = (Object.values(weights) as number[]).reduce((a, b) => a + b, 0) || 1;
+  return {
+    admissionSafety: weights.admissionSafety / total,
+    roi: weights.roi / total,
+    branchMatch: weights.branchMatch / total,
+    placement: weights.placement / total,
+    hostel: weights.hostel / total,
+    codingCulture: weights.codingCulture / total,
+  };
+}
+
 function WeightTunerModal({
   isOpen, onClose, weights, onSave,
 }: { isOpen: boolean; onClose: () => void; weights: ScoringWeights; onSave: (w: ScoringWeights) => void; }) {
@@ -170,8 +182,9 @@ function WeightTunerModal({
       roi: { admissionSafety: 0.15, roi: 0.45, branchMatch: 0.15, placement: 0.15, hostel: 0.05, codingCulture: 0.05 },
       coding: { admissionSafety: 0.1, roi: 0.1, branchMatch: 0.1, placement: 0.2, hostel: 0.1, codingCulture: 0.4 },
     };
-    setLocal(p[preset]);
-    onSave(p[preset]);
+    const applied = normalizeWeights(p[preset]);
+    setLocal(applied);
+    onSave(applied);
   };
 
   return (
@@ -212,6 +225,9 @@ function WeightTunerModal({
 
         {/* Sliders */}
         <div className="space-y-4">
+          <p className="text-[11px] -mt-1" style={{ color: "#555555" }}>
+            Drag any factor — weights auto-balance to total 100%.
+          </p>
           {[
             { key: "admissionSafety", label: "Admission Safety" },
             { key: "placement", label: "Placement Package & Quality" },
@@ -226,10 +242,10 @@ function WeightTunerModal({
                 <span className="font-mono text-white">{Math.round(local[item.key as keyof ScoringWeights] * 100)}%</span>
               </div>
               <input
-                type="range" min="0" max="60" step="5"
+                type="range" min="0" max="100" step="5"
                 value={Math.round(local[item.key as keyof ScoringWeights] * 100)}
                 onChange={(e) => {
-                  const updated = { ...local, [item.key]: Number(e.target.value) / 100 };
+                  const updated = normalizeWeights({ ...local, [item.key]: Number(e.target.value) / 100 });
                   setLocal(updated);
                   onSave(updated);
                 }}

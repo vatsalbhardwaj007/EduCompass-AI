@@ -40,13 +40,13 @@ export async function POST(request: Request) {
       : `Here are the student's matched colleges (ranked by fit score):\n${JSON.stringify(colleges, null, 2)}\n\nStudent's question: ${question}`;
 
     const completion = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
+      model: "openai/gpt-oss-120b",
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
         { role: "user", content: contextPrompt },
       ],
       temperature: 0.3,
-      max_tokens: 500,
+      max_tokens: 1500,
     });
 
     const answer =

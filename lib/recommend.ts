@@ -290,6 +290,28 @@ export function getRecommendations(
   colleges: College[],
   weights: ScoringWeights = DEFAULT_WEIGHTS
 ): RecommendedCollege[] {
+  // Normalize weights so they always sum to 1.0 — guarantees the final FIT
+  // score stays within the 0-100 range regardless of what sliders produce.
+  const raw = weights || DEFAULT_WEIGHTS;
+  const rawTotal =
+    raw.admissionSafety +
+    raw.roi +
+    raw.branchMatch +
+    raw.placement +
+    raw.hostel +
+    raw.codingCulture;
+  const w: ScoringWeights =
+    rawTotal > 0
+      ? {
+          admissionSafety: raw.admissionSafety / rawTotal,
+          roi: raw.roi / rawTotal,
+          branchMatch: raw.branchMatch / rawTotal,
+          placement: raw.placement / rawTotal,
+          hostel: raw.hostel / rawTotal,
+          codingCulture: raw.codingCulture / rawTotal,
+        }
+      : DEFAULT_WEIGHTS;
+
   const computeMatches = (rankMultiplier: number, budgetMultiplier: number): RecommendedCollege[] => {
     const results: RecommendedCollege[] = [];
 
@@ -324,12 +346,12 @@ export function getRecommendations(
         };
 
         const overallScore =
-          breakdown.admissionSafety * weights.admissionSafety +
-          breakdown.roi * weights.roi +
-          breakdown.branchMatch * weights.branchMatch +
-          breakdown.placement * weights.placement +
-          breakdown.hostel * weights.hostel +
-          breakdown.codingCulture * weights.codingCulture;
+          breakdown.admissionSafety * w.admissionSafety +
+          breakdown.roi * w.roi +
+          breakdown.branchMatch * w.branchMatch +
+          breakdown.placement * w.placement +
+          breakdown.hostel * w.hostel +
+          breakdown.codingCulture * w.codingCulture;
 
         if (!bestMatch || overallScore > bestMatch.score) {
           bestMatch = { branch, score: overallScore, breakdown };
