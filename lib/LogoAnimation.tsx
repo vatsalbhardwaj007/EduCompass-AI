@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
 
 /**
  * LogoAnimation
@@ -14,6 +15,7 @@ import { useEffect, useRef } from "react";
  */
 export default function LogoAnimation() {
   const overlayRef = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
 
   useEffect(() => {
     const el = overlayRef.current;
@@ -87,6 +89,9 @@ export default function LogoAnimation() {
     el.addEventListener("transitionend", onEnd);
   };
 
+  // The landing page owns its cinematic opening; preserve the existing intro for product routes.
+  if (pathname === "/") return null;
+
   return (
     <div
       ref={overlayRef}
@@ -103,8 +108,7 @@ export default function LogoAnimation() {
           className="logo-anim-word"
           aria-label="EduCompass"
           style={{
-            fontFamily:
-              "var(--font-signature), 'Dancing Script', 'Brush Script MT', cursive, sans-serif",
+            fontFamily: "var(--font-serif), Georgia, serif",
           }}
         >
           EduCompass

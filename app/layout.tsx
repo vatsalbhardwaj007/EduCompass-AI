@@ -1,39 +1,9 @@
 import type { Metadata } from "next";
-import {
-  Plus_Jakarta_Sans,
-  Geist_Mono,
-  Playfair_Display,
-  Dancing_Script,
-} from "next/font/google";
 import "./globals.css";
 import { ProfileProvider } from "@/lib/ProfileContext";
 import AIChatbot from "@/components/AIChatbot";
 import ScrollRevealInit from "@/lib/ScrollRevealInit";
 import LogoAnimation from "@/lib/LogoAnimation";
-
-const plusJakarta = Plus_Jakarta_Sans({
-  variable: "--font-sans",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-});
-
-const playfair = Playfair_Display({
-  variable: "--font-display",
-  subsets: ["latin"],
-  weight: ["700", "900"],
-});
-
-/** Signature / handwritten wordmark font */
-const dancingScript = Dancing_Script({
-  variable: "--font-signature",
-  subsets: ["latin"],
-  weight: ["700"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: "EduCompass AI — Find Your Best-Fit Engineering College",
@@ -50,11 +20,19 @@ export default function RootLayout({
     <html
       lang="en"
       data-scroll-behavior="smooth"
-      className={`${plusJakarta.variable} ${playfair.variable} ${dancingScript.variable} ${geistMono.variable} h-full antialiased dark`}
+      className="h-full antialiased"
+      suppressHydrationWarning
     >
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(() => { try { const saved = localStorage.getItem('educompass-theme'); const theme = saved === 'dark' || saved === 'light' ? saved : (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); document.documentElement.classList.toggle('dark', theme === 'dark'); document.documentElement.style.colorScheme = theme; } catch { } })();`,
+          }}
+        />
+      </head>
       <body
-        className="min-h-full flex flex-col font-sans selection:bg-white/10 selection:text-white"
-        style={{ backgroundColor: "var(--bg-page)", color: "var(--text-primary)" }}
+        className="min-h-full flex flex-col font-sans"
+        style={{ backgroundColor: "var(--background)", color: "var(--foreground)" }}
         suppressHydrationWarning
       >
         <ProfileProvider>
