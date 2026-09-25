@@ -47,7 +47,7 @@ function CollegeDetailModal({ rec, onClose }: { rec: RecommendedCollege | null; 
   const { college, matchedBranch, topReasons } = rec;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.92)", backdropFilter: "blur(20px)" }}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.78)", backdropFilter: "blur(12px)" }}>
       <div className="glass-card w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden" style={{ boxShadow: "0 32px 80px -12px rgba(0,0,0,0.9)" }}>
         {/* Header */}
         <div className="p-6 flex items-start justify-between" style={{ borderBottom: "1px solid rgba(255,255,255,0.07)", background: "rgba(10,10,10,0.7)" }}>
@@ -188,7 +188,7 @@ function WeightTunerModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.92)", backdropFilter: "blur(20px)" }}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.78)", backdropFilter: "blur(12px)" }}>
       <div className="glass-card w-full max-w-lg p-7 space-y-6" style={{ boxShadow: "0 32px 80px -12px rgba(0,0,0,0.9)" }}>
         <div className="flex items-center justify-between pb-5" style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
           <div className="flex items-center gap-2">
@@ -198,9 +198,10 @@ function WeightTunerModal({
           <div className="flex items-center gap-2">
             <Link
               href="/tuneweights"
-              className="text-xs text-neutral-400 hover:text-white flex items-center gap-1 transition-colors px-2.5 py-1 rounded-full border border-white/10 hover:border-white/30"
+              onClick={onClose}
+              className="text-xs text-neutral-300 hover:text-white flex items-center gap-1.5 transition-colors px-3 py-1.5 rounded-full border border-white/15 hover:border-white/40 bg-white/5 hover:bg-white/10"
             >
-              <ExternalLink className="h-3 w-3" /> Full Studio Page
+              <ExternalLink className="h-3.5 w-3.5" /> Full Studio Page
             </Link>
             <button onClick={onClose} className="h-8 w-8 rounded-lg flex items-center justify-center cursor-pointer hover:bg-white/10" style={{ color: "#888888" }}>
               <X className="h-4 w-4" />
@@ -327,8 +328,13 @@ export default function DashboardPage() {
             </p>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
-            <button onClick={() => setWeightModalOpen(true)} className="btn-outline flex items-center gap-1.5 px-4 py-2 text-xs cursor-pointer rounded-full">
-              <Sliders className="h-4 w-4" /> Tune Weights
+            <Link href="/tuneweights">
+              <button className="btn-outline flex items-center gap-1.5 px-4 py-2 text-xs cursor-pointer rounded-full hover:border-white/40">
+                <Sliders className="h-4 w-4" /> Tune Weights Studio
+              </button>
+            </Link>
+            <button onClick={() => setWeightModalOpen(true)} className="text-xs px-3 py-2 rounded-full border border-white/10 hover:border-white/30 text-neutral-400 hover:text-white cursor-pointer transition-colors" title="Quick adjustments popup">
+              Quick Tune
             </button>
             <button onClick={() => generatePDF(filteredRecs.slice(0, 10), profile)} className="btn-outline flex items-center gap-1.5 px-4 py-2 text-xs cursor-pointer rounded-full">
               <Download className="h-4 w-4" /> PDF Report

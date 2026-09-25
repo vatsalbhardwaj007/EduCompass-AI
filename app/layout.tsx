@@ -9,7 +9,6 @@ import "./globals.css";
 import { ProfileProvider } from "@/lib/ProfileContext";
 import AIChatbot from "@/components/AIChatbot";
 import ScrollRevealInit from "@/lib/ScrollRevealInit";
-import LogoAnimation from "@/lib/LogoAnimation";
 
 const plusJakarta = Plus_Jakarta_Sans({
   variable: "--font-sans",
@@ -64,14 +63,6 @@ export default function RootLayout({
 
         {/* Scroll reveal: wakes up .reveal-on-scroll elements as they enter viewport */}
         <ScrollRevealInit />
-
-        {/*
-         * Logo writing animation:
-         * Renders as a fixed overlay above all content.
-         * Plays once per full page load (layout doesn't remount on SPA nav).
-         * Respects prefers-reduced-motion.
-         */}
-        <LogoAnimation />
       </body>
     </html>
   );

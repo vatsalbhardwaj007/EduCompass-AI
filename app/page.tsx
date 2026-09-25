@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import EduCompassLogo from "@/components/EduCompassLogo";
+import LogoAnimation from "@/lib/LogoAnimation";
 import {
   GraduationCap,
   Target,
@@ -70,6 +71,7 @@ export default function LandingPage() {
 
   return (
     <div className="relative min-h-screen overflow-x-hidden" style={{ backgroundColor: "#0a0a0a", color: "#ffffff" }}>
+      <LogoAnimation />
 
       {/* ── Ambient background: subtle radial top glow + grid ── */}
       <div className="pointer-events-none fixed inset-0 -z-10 bg-grid-pattern" style={{ opacity: 0.5 }} />
