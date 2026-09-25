@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 
 export default function LogoAnimation() {
   const overlayRef = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
   const [visible, setVisible] = useState(true);
 
   useEffect(() => {
@@ -67,7 +69,7 @@ export default function LogoAnimation() {
     document.body.classList.add("logo-animation-done");
   };
 
-  if (!visible) return null;
+  if (pathname === "/" || !visible) return null;
 
   return (
     <div
@@ -85,8 +87,7 @@ export default function LogoAnimation() {
           className="logo-anim-word"
           aria-label="EduCompass"
           style={{
-            fontFamily:
-              "var(--font-signature), 'Dancing Script', 'Brush Script MT', cursive, sans-serif",
+            fontFamily: "var(--font-serif), Georgia, serif",
           }}
         >
           EduCompass

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import {
   StudentProfile,
   RecommendedCollege,
@@ -12,6 +12,7 @@ import { colleges } from "@/data/colleges";
 
 interface ProfileContextType {
   profile: StudentProfile | null;
+  isProfileReady: boolean;
   setProfile: (profile: StudentProfile) => void;
   recommendations: RecommendedCollege[];
   selectedCollegeIds: string[];
@@ -24,74 +25,73 @@ interface ProfileContextType {
 
 const ProfileContext = createContext<ProfileContextType | undefined>(undefined);
 
-const DEFAULT_DEMO_PROFILE: StudentProfile = {
-  jeeMainRank: 5000,
-  jeeAdvancedRank: 500,
-  category: "general",
-  gender: "male",
-  homeState: "Delhi",
-  budget: 1500000,
-  hostelNeeded: true,
-  preferredBranches: [],
-  careerGoal: "high_package",
+const PROFILE_STORAGE_KEY = "educompass_profile";
+const CATEGORIES = ["general", "obc", "sc", "st", "ews"] as const;
+const GENDERS = ["male", "female", "other"] as const;
+const CAREER_GOALS = ["high_package", "research", "entrepreneurship", "govt_job", "core_engineering"] as const;
+
+const isValidSavedProfile = (value: unknown): value is StudentProfile => {
+  if (!value || typeof value !== "object") return false;
+
+  const profile = value as Partial<StudentProfile>;
+  const hasValidAdvancedRank = profile.jeeAdvancedRank == null
+    || (typeof profile.jeeAdvancedRank === "number" && Number.isFinite(profile.jeeAdvancedRank) && profile.jeeAdvancedRank > 0);
+
+  return (
+    typeof profile.jeeMainRank === "number" && Number.isFinite(profile.jeeMainRank) && profile.jeeMainRank > 0
+    && hasValidAdvancedRank
+    && CATEGORIES.includes(profile.category as StudentProfile["category"])
+    && GENDERS.includes(profile.gender as StudentProfile["gender"])
+    && typeof profile.homeState === "string" && profile.homeState.trim().length > 0
+    && typeof profile.budget === "number" && Number.isFinite(profile.budget) && profile.budget > 0
+    && typeof profile.hostelNeeded === "boolean"
+    && Array.isArray(profile.preferredBranches) && profile.preferredBranches.every((branch) => typeof branch === "string")
+    && CAREER_GOALS.includes(profile.careerGoal as StudentProfile["careerGoal"])
+  );
 };
 
-const getInitialProfile = (): StudentProfile => {
-  if (typeof window === "undefined") return DEFAULT_DEMO_PROFILE;
+const getStoredProfile = (): StudentProfile | null => {
+  if (typeof window === "undefined") return null;
   try {
-    const saved = localStorage.getItem("educompass_profile");
-    if (saved) {
-      return JSON.parse(saved) as StudentProfile;
-    }
+    const saved = localStorage.getItem(PROFILE_STORAGE_KEY);
+    const parsed = saved ? JSON.parse(saved) as unknown : null;
+    return isValidSavedProfile(parsed) ? parsed : null;
   } catch {
-    // fallback
+    // Treat unreadable or malformed storage as an empty profile.
+    return null;
   }
-  return DEFAULT_DEMO_PROFILE;
 };
 
 export function ProfileProvider({ children }: { children: React.ReactNode }) {
-  const [profile, setProfileState] = useState<StudentProfile>(DEFAULT_DEMO_PROFILE);
-  const [recommendations, setRecommendations] = useState<RecommendedCollege[]>(() => 
-    getRecommendations(DEFAULT_DEMO_PROFILE, colleges, DEFAULT_WEIGHTS)
-  );
+  const [profile, setProfileState] = useState<StudentProfile | null>(null);
+  const [isProfileReady, setIsProfileReady] = useState(false);
   const [selectedCollegeIds, setSelectedCollegeIds] = useState<string[]>([]);
   const [weights, setWeightsState] = useState<ScoringWeights>(DEFAULT_WEIGHTS);
 
-  const calculateRecommendations = useCallback(
-    (p: StudentProfile, w: ScoringWeights) => {
-      const results = getRecommendations(p, colleges, w);
-      setRecommendations(results);
-    },
-    []
-  );
-
-  // Sync profile & recommendations on client mount from localStorage
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem("educompass_profile");
-      if (saved) {
-        const parsed = JSON.parse(saved) as StudentProfile;
-        setProfileState(parsed);
-        calculateRecommendations(parsed, weights);
-        return;
-      }
-    } catch {
-      // fallback
-    }
-    calculateRecommendations(DEFAULT_DEMO_PROFILE, weights);
-  }, [calculateRecommendations]);
+    const timer = window.setTimeout(() => {
+      setProfileState(getStoredProfile());
+      setIsProfileReady(true);
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  const recommendations = useMemo(
+    () => (profile ? getRecommendations(profile, colleges, weights) : []),
+    [profile, weights]
+  );
 
   const setProfile = useCallback(
     (p: StudentProfile) => {
       setProfileState(p);
       try {
-        localStorage.setItem("educompass_profile", JSON.stringify(p));
+        localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(p));
       } catch {
         // ignore quota errors
       }
-      calculateRecommendations(p, weights);
     },
-    [weights, calculateRecommendations]
+    []
   );
 
   const toggleCollegeSelection = useCallback((id: string) => {
@@ -109,19 +109,19 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
   const setWeights = useCallback(
     (w: ScoringWeights) => {
       setWeightsState(w);
-      if (profile) calculateRecommendations(profile, w);
     },
-    [profile, calculateRecommendations]
+    []
   );
 
   const recalculate = useCallback(() => {
-    if (profile) calculateRecommendations(profile, weights);
-  }, [profile, weights, calculateRecommendations]);
+    setWeightsState((current) => ({ ...current }));
+  }, []);
 
   return (
     <ProfileContext.Provider
       value={{
         profile,
+        isProfileReady,
         setProfile,
         recommendations,
         selectedCollegeIds,

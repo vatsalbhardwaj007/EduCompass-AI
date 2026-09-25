@@ -1,163 +1,50 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import EduCompassLogo from "@/components/EduCompassLogo";
+import { useRouter } from "next/navigation";
 import {
-  Compass, ArrowLeft, GitCompareArrows, Download, MessageSquareText,
-  MapPin, IndianRupee, TrendingUp, Building2, CheckCircle2, Star,
-  Code2, Home, X, Send, Bot, User, Loader2, Sliders, Search, ChevronRight, ExternalLink,
+  ArrowRight,
+  ArrowUpRight,
+  Check,
+  ChevronDown,
+  ChevronRight,
+  Download,
+  GitCompareArrows,
+  GraduationCap,
+  MapPin,
+  Menu,
+  Search,
+  SlidersHorizontal,
+  ExternalLink,
+  X,
 } from "lucide-react";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import ThemeToggle from "@/components/landing/ThemeToggle";
+import EduCompassBrand from "@/components/EduCompassBrand";
 import { useProfile } from "@/lib/ProfileContext";
-import { RecommendedCollege, ScoringWeights, DEFAULT_WEIGHTS } from "@/lib/types";
+import {
+  DEFAULT_WEIGHTS,
+  RecommendedCollege,
+  ScoringWeights,
+} from "@/lib/types";
 import { generatePDF } from "@/lib/generatePDF";
 
-/* ── Score Ring ── */
-function ScoreRing({ score, size = 68 }: { score: number; size?: number }) {
-  const radius = (size - 10) / 2;
-  const circumference = 2 * Math.PI * radius;
-  const offset = circumference - (score / 100) * circumference;
-  const strokeColor = score >= 75 ? "#ffffff" : score >= 50 ? "#aaaaaa" : "#555555";
+type SortKey = "fit" | "package" | "fees" | "safety";
 
-  return (
-    <div className="relative flex items-center justify-center shrink-0" style={{ width: size, height: size }}>
-      <svg className="rotate-[-90deg]" width={size} height={size}>
-        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth={5} />
-        <circle
-          cx={size / 2} cy={size / 2} r={radius} fill="none" strokeWidth={5}
-          strokeDasharray={circumference} strokeDashoffset={offset} strokeLinecap="round"
-          style={{ stroke: strokeColor, transition: "stroke-dashoffset 1s cubic-bezier(0.22,1,0.36,1)" }}
-        />
-      </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-base font-extrabold font-mono text-white">{Math.round(score)}</span>
-        <span className="text-[9px] uppercase tracking-widest font-bold" style={{ color: "#444444" }}>FIT</span>
-      </div>
-    </div>
-  );
+const INSTITUTE_TYPES = ["ALL", "IIT", "NIT", "IIIT", "GFTI"] as const;
+
+function formatLakhs(value: number) {
+  return "₹" + (value / 100000).toFixed(1) + "L";
 }
 
-/* ── College Detail Modal ── */
-function CollegeDetailModal({ rec, onClose }: { rec: RecommendedCollege | null; onClose: () => void }) {
-  if (!rec) return null;
-  const { college, matchedBranch, topReasons } = rec;
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.78)", backdropFilter: "blur(12px)" }}>
-      <div className="glass-card w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden" style={{ boxShadow: "0 32px 80px -12px rgba(0,0,0,0.9)" }}>
-        {/* Header */}
-        <div className="p-6 flex items-start justify-between" style={{ borderBottom: "1px solid rgba(255,255,255,0.07)", background: "rgba(10,10,10,0.7)" }}>
-          <div>
-            <div className="flex items-center gap-2 mb-1 flex-wrap">
-              <span className="badge-white">{college.type}</span>
-              {college.nirfRank && <span className="badge-white">NIRF #{college.nirfRank}</span>}
-              <span className="text-xs flex items-center gap-1" style={{ color: "#555555" }}>
-                <MapPin className="h-3 w-3" /> {college.city}, {college.state}
-              </span>
-            </div>
-            <h2 className="text-xl font-bold text-white">{college.name}</h2>
-            <p className="text-xs mt-1 font-semibold" style={{ color: "#888888" }}>Matched Program: {matchedBranch.name}</p>
-          </div>
-          <button
-            onClick={onClose}
-            className="h-8 w-8 rounded-lg flex items-center justify-center transition-all cursor-pointer"
-            style={{ color: "#666666" }}
-            onMouseEnter={(e) => { e.currentTarget.style.color = "#ffffff"; e.currentTarget.style.background = "rgba(255,255,255,0.06)"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.color = "#666666"; e.currentTarget.style.background = "transparent"; }}
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-
-        <ScrollArea className="flex-1 p-6 space-y-6">
-          {/* Metrics */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {[
-              { label: "Total Tuition", val: `₹${(college.fees / 100000).toFixed(1)}L` },
-              { label: "Avg Package", val: `₹${college.avgPackageLPA} LPA` },
-              { label: "Hostel Rating", val: `${college.hostelRating} / 5` },
-              { label: "Coding Culture", val: `${college.codingCultureRating} / 5` },
-            ].map((m) => (
-              <div key={m.label} className="p-3 rounded-xl" style={{ background: "#1a1a1a", border: "1px solid rgba(255,255,255,0.07)" }}>
-                <div className="text-[10px] mb-1" style={{ color: "#444444" }}>{m.label}</div>
-                <div className="text-lg font-bold font-mono text-white">{m.val}</div>
-              </div>
-            ))}
-          </div>
-
-          {/* Match reasons */}
-          <div className="space-y-2">
-            <h3 className="text-xs font-bold uppercase tracking-wider" style={{ color: "#444444" }}>Match Reasons</h3>
-            {topReasons.map((r, i) => (
-              <div key={i} className="flex items-start gap-2 p-3 rounded-lg text-sm" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", color: "#888888" }}>
-                <CheckCircle2 className="h-4 w-4 shrink-0 mt-0.5" style={{ color: "#aaaaaa" }} />
-                {r}
-              </div>
-            ))}
-          </div>
-
-          {/* Recruiters */}
-          {college.topRecruiters && college.topRecruiters.length > 0 && (
-            <div className="space-y-2">
-              <h3 className="text-xs font-bold uppercase tracking-wider" style={{ color: "#444444" }}>Top Recruiters</h3>
-              <div className="flex flex-wrap gap-2">
-                {college.topRecruiters.map((c) => (
-                  <span key={c} className="text-xs px-3 py-1 rounded-full" style={{ background: "#1a1a1a", border: "1px solid rgba(255,255,255,0.07)", color: "#888888" }}>{c}</span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Cutoff table */}
-          <div className="space-y-2">
-            <h3 className="text-xs font-bold uppercase tracking-wider" style={{ color: "#444444" }}>All Branches Cutoff Ranks</h3>
-            <div className="rounded-xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.07)" }}>
-              <table className="w-full text-xs text-left">
-                <thead style={{ background: "rgba(255,255,255,0.03)", borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
-                  <tr>
-                    {["Branch", "GEN", "OBC", "SC", "ST", "EWS"].map((h) => (
-                      <th key={h} className="p-3 font-semibold uppercase tracking-wider" style={{ color: "#444444" }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {college.branches.map((b) => (
-                    <tr
-                      key={b.name}
-                      style={{
-                        borderTop: "1px solid rgba(255,255,255,0.05)",
-                        background: b.name === matchedBranch.name ? "rgba(255,255,255,0.05)" : "transparent",
-                        color: b.name === matchedBranch.name ? "#ffffff" : "#777777",
-                        fontWeight: b.name === matchedBranch.name ? 600 : 400,
-                      }}
-                    >
-                      <td className="p-3 font-sans">{b.name}</td>
-                      {["general","obc","sc","st","ews"].map((cat) => (
-                        <td key={cat} className="p-3 font-mono">#{b.closingRank[cat as keyof typeof b.closingRank]}</td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </ScrollArea>
-
-        <div className="p-4 flex justify-end" style={{ borderTop: "1px solid rgba(255,255,255,0.07)", background: "rgba(10,10,10,0.6)" }}>
-          <button onClick={onClose} className="btn-accent px-6 py-2 text-xs cursor-pointer rounded-full">Close</button>
-        </div>
-      </div>
-    </div>
-  );
+function safetyLabel(score: number) {
+  if (score >= 75) return "Strong rank alignment";
+  if (score >= 50) return "Moderate rank alignment";
+  return "Limited rank alignment";
 }
 
-/* ── Weight Tuner Modal ── */
 function normalizeWeights(weights: ScoringWeights): ScoringWeights {
-  const total = (Object.values(weights) as number[]).reduce((a, b) => a + b, 0) || 1;
+  const total = (Object.values(weights) as number[]).reduce((sum, value) => sum + value, 0) || 1;
   return {
     admissionSafety: weights.admissionSafety / total,
     roi: weights.roi / total,
@@ -168,339 +55,491 @@ function normalizeWeights(weights: ScoringWeights): ScoringWeights {
   };
 }
 
-function WeightTunerModal({
-  isOpen, onClose, weights, onSave,
-}: { isOpen: boolean; onClose: () => void; weights: ScoringWeights; onSave: (w: ScoringWeights) => void; }) {
-  const [local, setLocal] = useState<ScoringWeights>(weights);
-  useEffect(() => setLocal(weights), [weights]);
-  if (!isOpen) return null;
-
-  const applyPreset = (preset: "balanced" | "placement" | "roi" | "coding") => {
-    const p: Record<string, ScoringWeights> = {
-      balanced: DEFAULT_WEIGHTS,
-      placement: { admissionSafety: 0.1, roi: 0.1, branchMatch: 0.1, placement: 0.5, hostel: 0.1, codingCulture: 0.1 },
-      roi: { admissionSafety: 0.15, roi: 0.45, branchMatch: 0.15, placement: 0.15, hostel: 0.05, codingCulture: 0.05 },
-      coding: { admissionSafety: 0.1, roi: 0.1, branchMatch: 0.1, placement: 0.2, hostel: 0.1, codingCulture: 0.4 },
-    };
-    const applied = normalizeWeights(p[preset]);
-    setLocal(applied);
-    onSave(applied);
-  };
+function FitRing({ score }: { score: number }) {
+  const size = 74;
+  const radius = 31;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (Math.max(0, Math.min(score, 100)) / 100) * circumference;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.78)", backdropFilter: "blur(12px)" }}>
-      <div className="glass-card w-full max-w-lg p-7 space-y-6" style={{ boxShadow: "0 32px 80px -12px rgba(0,0,0,0.9)" }}>
-        <div className="flex items-center justify-between pb-5" style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
-          <div className="flex items-center gap-2">
-            <Sliders className="h-5 w-5 text-white" />
-            <h2 className="font-bold text-base text-white">Live Factor Weight Customizer</h2>
-          </div>
-          <div className="flex items-center gap-2">
-            <Link
-              href="/tuneweights"
-              onClick={onClose}
-              className="text-xs text-neutral-300 hover:text-white flex items-center gap-1.5 transition-colors px-3 py-1.5 rounded-full border border-white/15 hover:border-white/40 bg-white/5 hover:bg-white/10"
-            >
-              <ExternalLink className="h-3.5 w-3.5" /> Full Studio Page
-            </Link>
-            <button onClick={onClose} className="h-8 w-8 rounded-lg flex items-center justify-center cursor-pointer hover:bg-white/10" style={{ color: "#888888" }}>
-              <X className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
-
-        {/* Presets */}
-        <div className="space-y-2">
-          <span className="text-xs font-bold uppercase tracking-wider" style={{ color: "#444444" }}>Quick Presets</span>
-          <div className="flex flex-wrap gap-2 pt-1">
-            {[
-              { key: "balanced", label: "Balanced (Default)" },
-              { key: "placement", label: "High Placement" },
-              { key: "roi", label: "Max ROI" },
-              { key: "coding", label: "Coding Culture" },
-            ].map(({ key, label }) => (
-              <button
-                key={key} onClick={() => applyPreset(key as any)}
-                className="text-xs px-3.5 py-1.5 rounded-full border font-medium cursor-pointer transition-all"
-                style={{ background: "#1a1a1a", borderColor: "rgba(255,255,255,0.08)", color: "#888888" }}
-                onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.3)"; e.currentTarget.style.color = "#ffffff"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"; e.currentTarget.style.color = "#888888"; }}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Sliders */}
-        <div className="space-y-4">
-          <p className="text-[11px] -mt-1" style={{ color: "#555555" }}>
-            Drag any factor — weights auto-balance to total 100%.
-          </p>
-          {[
-            { key: "admissionSafety", label: "Admission Safety" },
-            { key: "placement", label: "Placement Package & Quality" },
-            { key: "roi", label: "ROI (Salary vs Tuition)" },
-            { key: "branchMatch", label: "Preferred Branch Alignment" },
-            { key: "codingCulture", label: "Coding Culture & Tech Clubs" },
-            { key: "hostel", label: "Hostel & Campus Facilities" },
-          ].map((item) => (
-            <div key={item.key} className="space-y-1.5">
-              <div className="flex justify-between text-xs font-semibold">
-                <span style={{ color: "#888888" }}>{item.label}</span>
-                <span className="font-mono text-white">{Math.round(local[item.key as keyof ScoringWeights] * 100)}%</span>
-              </div>
-              <input
-                type="range" min="0" max="100" step="5"
-                value={Math.round(local[item.key as keyof ScoringWeights] * 100)}
-                onChange={(e) => {
-                  const updated = normalizeWeights({ ...local, [item.key]: Number(e.target.value) / 100 });
-                  setLocal(updated);
-                  onSave(updated);
-                }}
-                className="w-full h-1.5 rounded-full appearance-none cursor-pointer"
-                style={{ accentColor: "#ffffff", background: "#1a1a1a" }}
-              />
-            </div>
-          ))}
-        </div>
-
-        <div className="flex justify-end pt-2">
-          <button onClick={onClose} className="btn-accent px-6 py-2 text-xs cursor-pointer rounded-full">Done &amp; Recalculate</button>
-        </div>
-      </div>
+    <div className="dashboard-fit-ring" role="img" aria-label={Math.round(score) + " FIT score"}>
+      <svg aria-hidden="true" className="dashboard-fit-ring-svg" viewBox={"0 0 " + size + " " + size}>
+        <circle className="dashboard-fit-ring-track" cx={size / 2} cy={size / 2} r={radius} />
+        <circle
+          className="dashboard-fit-ring-value"
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+        />
+      </svg>
+      <span>{Math.round(score)}</span>
+      <small>FIT</small>
     </div>
   );
 }
 
-/* ── Main Dashboard ── */
+function WeightTunerModal({
+  isOpen,
+  onClose,
+  weights,
+  onSave,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  weights: ScoringWeights;
+  onSave: (weights: ScoringWeights) => void;
+}) {
+  const [localWeights, setLocalWeights] = useState<ScoringWeights>(weights);
+
+  if (!isOpen) return null;
+
+  const updateWeights = (next: ScoringWeights) => {
+    const normalized = normalizeWeights(next);
+    setLocalWeights(normalized);
+    onSave(normalized);
+  };
+
+  const presets: { label: string; values: ScoringWeights }[] = [
+    { label: "Balanced", values: DEFAULT_WEIGHTS },
+    { label: "Placement", values: { admissionSafety: 0.1, roi: 0.1, branchMatch: 0.1, placement: 0.5, hostel: 0.1, codingCulture: 0.1 } },
+    { label: "ROI", values: { admissionSafety: 0.15, roi: 0.45, branchMatch: 0.15, placement: 0.15, hostel: 0.05, codingCulture: 0.05 } },
+    { label: "Coding", values: { admissionSafety: 0.1, roi: 0.1, branchMatch: 0.1, placement: 0.2, hostel: 0.1, codingCulture: 0.4 } },
+  ];
+
+  const factors: { key: keyof ScoringWeights; label: string }[] = [
+    { key: "admissionSafety", label: "Admission safety" },
+    { key: "placement", label: "Placement package & quality" },
+    { key: "roi", label: "ROI (salary vs tuition)" },
+    { key: "branchMatch", label: "Preferred branch alignment" },
+    { key: "codingCulture", label: "Coding culture & tech clubs" },
+    { key: "hostel", label: "Hostel & campus facilities" },
+  ];
+
+  return (
+    <div className="dashboard-modal-backdrop" role="presentation" onMouseDown={onClose}>
+      <section
+        className="dashboard-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="tune-weights-title"
+        onMouseDown={(event) => event.stopPropagation()}
+      >
+        <header className="dashboard-modal-header">
+          <div>
+            <p className="dashboard-eyebrow">Recommendation inputs</p>
+            <h2 id="tune-weights-title">Tune what matters most.</h2>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <Link
+              href="/tuneweights"
+              onClick={onClose}
+              className="dashboard-small-button"
+              style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
+            >
+              <ExternalLink size={14} /> Full Studio Page
+            </Link>
+            <button className="dashboard-icon-button" type="button" onClick={onClose} aria-label="Close tune weights">
+              <X size={18} aria-hidden="true" />
+            </button>
+          </div>
+        </header>
+
+        <p className="dashboard-modal-copy">Adjusting one factor recalculates the same deterministic FIT score using your existing preferences.</p>
+
+        <div className="dashboard-preset-row" aria-label="Weight presets">
+          {presets.map((preset) => (
+            <button key={preset.label} type="button" className="dashboard-small-button" onClick={() => updateWeights(preset.values)}>
+              {preset.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="dashboard-weight-list">
+          {factors.map((factor) => (
+            <label key={factor.key} className="dashboard-weight-control">
+              <span>
+                {factor.label}
+                <strong>{Math.round(localWeights[factor.key] * 100)}%</strong>
+              </span>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                step="5"
+                value={Math.round(localWeights[factor.key] * 100)}
+                onChange={(event) => updateWeights({ ...localWeights, [factor.key]: Number(event.target.value) / 100 })}
+              />
+            </label>
+          ))}
+        </div>
+
+        <footer className="dashboard-modal-footer">
+          <button type="button" className="dashboard-primary-button" onClick={onClose}>Done</button>
+        </footer>
+      </section>
+    </div>
+  );
+}
+
+function CollegeDetailModal({ rec, onClose }: { rec: RecommendedCollege | null; onClose: () => void }) {
+  if (!rec) return null;
+
+  const { college, matchedBranch, topReasons, overallScore, breakdown } = rec;
+  const metrics = [
+    { label: "Total tuition", value: formatLakhs(college.fees) },
+    { label: "Average package", value: "₹" + college.avgPackageLPA + "L" },
+    { label: "Admission safety", value: safetyLabel(breakdown.admissionSafety) },
+    { label: "FIT", value: Math.round(overallScore) + " / 100" },
+  ];
+
+  return (
+    <div className="dashboard-modal-backdrop" role="presentation" onMouseDown={onClose}>
+      <section
+        className="dashboard-modal dashboard-detail-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="college-detail-title"
+        onMouseDown={(event) => event.stopPropagation()}
+      >
+        <header className="dashboard-modal-header">
+          <div>
+            <p className="dashboard-eyebrow">{college.type} · {college.city}, {college.state}</p>
+            <h2 id="college-detail-title">{college.name}</h2>
+            <p className="dashboard-detail-program">Matched program: {matchedBranch.name}</p>
+          </div>
+          <button className="dashboard-icon-button" type="button" onClick={onClose} aria-label="Close college details">
+            <X size={18} aria-hidden="true" />
+          </button>
+        </header>
+
+        <div className="dashboard-detail-scroll">
+          <dl className="dashboard-detail-metrics">
+            {metrics.map((metric) => (
+              <div key={metric.label}>
+                <dt>{metric.label}</dt>
+                <dd>{metric.value}</dd>
+              </div>
+            ))}
+          </dl>
+
+          <section className="dashboard-detail-section">
+            <h3>Why it fits</h3>
+            <ul>
+              {topReasons.map((reason) => <li key={reason}>{reason}</li>)}
+            </ul>
+          </section>
+
+          <section className="dashboard-detail-section">
+            <h3>Branch cutoffs</h3>
+            <div className="dashboard-cutoff-table-wrap">
+              <table className="dashboard-cutoff-table">
+                <thead>
+                  <tr>
+                    <th>Branch</th>
+                    <th>GEN</th>
+                    <th>OBC</th>
+                    <th>SC</th>
+                    <th>ST</th>
+                    <th>EWS</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {college.branches.map((branch) => (
+                    <tr key={branch.name} data-matched={branch.name === matchedBranch.name}>
+                      <td>{branch.name}</td>
+                      <td>{branch.closingRank.general}</td>
+                      <td>{branch.closingRank.obc}</td>
+                      <td>{branch.closingRank.sc}</td>
+                      <td>{branch.closingRank.st}</td>
+                      <td>{branch.closingRank.ews}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <footer className="dashboard-modal-footer">
+          <button type="button" className="dashboard-primary-button" onClick={onClose}>Close details</button>
+        </footer>
+      </section>
+    </div>
+  );
+}
+
 export default function DashboardPage() {
   const router = useRouter();
-  const { profile, recommendations, selectedCollegeIds, toggleCollegeSelection, clearSelections, weights, setWeights } = useProfile();
+  const {
+    profile,
+    isProfileReady,
+    recommendations,
+    selectedCollegeIds,
+    toggleCollegeSelection,
+    clearSelections,
+    weights,
+    setWeights,
+  } = useProfile();
   const [weightModalOpen, setWeightModalOpen] = useState(false);
   const [detailCollege, setDetailCollege] = useState<RecommendedCollege | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedType, setSelectedType] = useState<string>("ALL");
-  const [sortBy, setSortBy] = useState<"fit" | "package" | "fees" | "safety">("fit");
+  const [selectedType, setSelectedType] = useState<(typeof INSTITUTE_TYPES)[number]>("ALL");
+  const [sortBy, setSortBy] = useState<SortKey>("fit");
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  useEffect(() => { if (!profile) router.push("/profile"); }, [profile, router]);
-  if (!profile) return null;
+  useEffect(() => {
+    if (isProfileReady && !profile) router.replace("/profile");
+  }, [isProfileReady, profile, router]);
 
-  const filteredRecs = recommendations
-    .filter((r) => {
-      const q = r.college.name.toLowerCase() + r.college.city.toLowerCase();
-      return q.includes(searchQuery.toLowerCase()) && (selectedType === "ALL" || r.college.type === selectedType);
+  const filteredRecs = useMemo(() => recommendations
+    .filter((rec) => {
+      const searchable = rec.college.name + " " + rec.college.city;
+      return searchable.toLowerCase().includes(searchQuery.toLowerCase())
+        && (selectedType === "ALL" || rec.college.type === selectedType);
     })
-    .sort((a, b) => {
-      if (sortBy === "package") return b.college.avgPackageLPA - a.college.avgPackageLPA;
-      if (sortBy === "fees") return a.college.fees - b.college.fees;
-      if (sortBy === "safety") return b.breakdown.admissionSafety - a.breakdown.admissionSafety;
-      return b.overallScore - a.overallScore;
-    });
+    .sort((left, right) => {
+      if (sortBy === "package") return right.college.avgPackageLPA - left.college.avgPackageLPA;
+      if (sortBy === "fees") return left.college.fees - right.college.fees;
+      if (sortBy === "safety") return right.breakdown.admissionSafety - left.breakdown.admissionSafety;
+      return right.overallScore - left.overallScore;
+    }), [recommendations, searchQuery, selectedType, sortBy]);
+
+  if (!isProfileReady || !profile) return null;
+
+  const topRecommendation = recommendations[0];
+  const preferredBranches = profile.preferredBranches.length
+    ? profile.preferredBranches.slice(0, 2).join(" · ")
+    : "All branches";
+  const resultLabel = filteredRecs.length + " college" + (filteredRecs.length === 1 ? "" : "s") + " worth a closer look";
+
+  const closeMenu = () => setMenuOpen(false);
 
   return (
-    <div className="relative min-h-screen pb-24" style={{ backgroundColor: "#0a0a0a", color: "#ffffff" }}>
-      <div className="pointer-events-none fixed inset-0 -z-10 bg-grid-pattern" style={{ opacity: 0.35 }} />
-      <div className="pointer-events-none fixed inset-0 -z-10" style={{ background: "radial-gradient(ellipse 80% 40% at 50% -5%, rgba(255,255,255,0.05) 0%, transparent 70%)" }} />
+    <main className="dashboard-v2">
+      <nav className="dashboard-nav" aria-label="Dashboard navigation">
+        <div className="dashboard-nav-inner">
+          <EduCompassBrand className="dashboard-brand" />
 
-      {/* Nav */}
-      <nav className="sticky top-0 z-40 glass-nav px-6 py-4 md:px-12 flex items-center justify-between">
-        <EduCompassLogo />
-        <Link href="/profile">
-          <button className="btn-outline px-4 py-2 text-sm cursor-pointer flex items-center gap-1.5">
-            <ArrowLeft className="h-4 w-4" /> Edit Profile
-          </button>
-        </Link>
+          <div className="dashboard-desktop-links">
+            <a href="#overview">Overview</a>
+            <a href="#matches" aria-current="page">Matches</a>
+            <Link href="/compare">Compare{selectedCollegeIds.length ? " · " + selectedCollegeIds.length : ""}</Link>
+          </div>
+
+          <div className="dashboard-nav-actions">
+            <span className="dashboard-theme-label">Theme</span>
+            <ThemeToggle />
+            <Link className="dashboard-profile-link" href="/profile">Edit profile <ArrowUpRight size={14} aria-hidden="true" /></Link>
+            <button
+              className="dashboard-menu-button"
+              type="button"
+              onClick={() => setMenuOpen((open) => !open)}
+              aria-expanded={menuOpen}
+              aria-controls="dashboard-mobile-menu"
+            >
+              {menuOpen ? <X size={18} aria-hidden="true" /> : <Menu size={18} aria-hidden="true" />}
+              <span>Menu</span>
+            </button>
+          </div>
+        </div>
+
+        {menuOpen && (
+          <div id="dashboard-mobile-menu" className="dashboard-mobile-menu">
+            <a href="#overview" onClick={closeMenu}>Overview</a>
+            <a href="#matches" onClick={closeMenu}>Matches</a>
+            <Link href="/compare" onClick={closeMenu}>Compare{selectedCollegeIds.length ? " · " + selectedCollegeIds.length : ""}</Link>
+            <Link href="/profile" onClick={closeMenu}>Edit profile</Link>
+            <div><span>Theme</span><ThemeToggle /></div>
+          </div>
+        )}
       </nav>
 
-      <div className="mx-auto max-w-6xl px-6 py-8 md:py-12 space-y-7">
-        {/* Header card */}
-        <div className="glass-card p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-5 reveal-on-scroll">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="badge-white">{profile.category.toUpperCase()} Category</span>
-              <span className="text-xs px-2.5 py-0.5 rounded-full border" style={{ color: "#666666", borderColor: "rgba(255,255,255,0.08)", background: "#1a1a1a" }}>{profile.homeState}</span>
-            </div>
-            <h1 className="editorial-heading" style={{ fontSize: "clamp(1.5rem, 3vw, 2rem)" }}>Best-Fit College Recommendations</h1>
-            <p className="text-xs" style={{ color: "#888888" }}>
-              Matched for Main Rank <strong className="font-mono text-white">#{profile.jeeMainRank.toLocaleString()}</strong>
-              {profile.jeeAdvancedRank && <> &amp; Advanced Rank <strong className="font-mono text-white">#{profile.jeeAdvancedRank.toLocaleString()}</strong></>}
-            </p>
+      <div className="dashboard-shell">
+        <header id="matches" className="dashboard-intro">
+          <div>
+            <p className="dashboard-eyebrow">Matches</p>
+            <h1>Your college <em>matches.</em></h1>
+            <p className="dashboard-lede">Based on your rank, priorities, budget, and career goals.</p>
           </div>
-          <div className="flex items-center gap-2 flex-wrap">
-            <Link href="/tuneweights">
-              <button className="btn-outline flex items-center gap-1.5 px-4 py-2 text-xs cursor-pointer rounded-full hover:border-white/40">
-                <Sliders className="h-4 w-4" /> Tune Weights Studio
-              </button>
-            </Link>
-            <button onClick={() => setWeightModalOpen(true)} className="text-xs px-3 py-2 rounded-full border border-white/10 hover:border-white/30 text-neutral-400 hover:text-white cursor-pointer transition-colors" title="Quick adjustments popup">
-              Quick Tune
-            </button>
-            <button onClick={() => generatePDF(filteredRecs.slice(0, 10), profile)} className="btn-outline flex items-center gap-1.5 px-4 py-2 text-xs cursor-pointer rounded-full">
-              <Download className="h-4 w-4" /> PDF Report
-            </button>
-            {selectedCollegeIds.length >= 2 && (
-              <Link href="/compare">
-                <button className="btn-accent flex items-center gap-1.5 px-5 py-2 text-xs cursor-pointer rounded-full">
-                  <GitCompareArrows className="h-4 w-4" /> Compare ({selectedCollegeIds.length})
-                </button>
-              </Link>
-            )}
-          </div>
-        </div>
+          <aside className="dashboard-context-note">
+            <p className="dashboard-eyebrow">Recommendation context</p>
+            <p>Rank, branch preferences, budget and career goal are shaping these matches.</p>
+            <Link href="/profile">Edit profile <ArrowRight size={14} aria-hidden="true" /></Link>
+          </aside>
+        </header>
 
-        {/* Filter bar */}
-        <div className="glass-card p-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-4 reveal-on-scroll">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-2.5 h-4 w-4" style={{ color: "#444444" }} />
-            <Input placeholder="Search by college name or city…" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="bg-[#1a1a1a] border-[rgba(255,255,255,0.07)] text-xs text-white pl-9 h-9 rounded-xl placeholder:text-[#444]" />
+        <section id="overview" className="dashboard-context" aria-labelledby="profile-context-title">
+          <h2 id="profile-context-title" className="sr-only">Your profile and match overview</h2>
+          <dl className="dashboard-profile-strip">
+            <div>
+              <dt>JEE Main</dt>
+              <dd>{profile.jeeMainRank.toLocaleString()}</dd>
+            </div>
+            {profile.jeeAdvancedRank ? (
+              <div>
+                <dt>JEE Advanced</dt>
+                <dd>{profile.jeeAdvancedRank.toLocaleString()}</dd>
+              </div>
+            ) : null}
+            <div>
+              <dt>Category</dt>
+              <dd>{profile.category}</dd>
+            </div>
+            <div>
+              <dt>Budget</dt>
+              <dd>{formatLakhs(profile.budget)}</dd>
+            </div>
+            <div>
+              <dt>Preferred</dt>
+              <dd>{preferredBranches}</dd>
+            </div>
+          </dl>
+
+          <div className="dashboard-overview-line">
+            <span><b>Your profile</b> JEE Main {profile.jeeMainRank.toLocaleString()} · {profile.category}</span>
+            {topRecommendation ? <span><b>Top match</b> {topRecommendation.college.name} · FIT {Math.round(topRecommendation.overallScore)}</span> : null}
+            <span><b>Comparison</b> {selectedCollegeIds.length ? selectedCollegeIds.length + " selected" : "None selected"}</span>
           </div>
-          <div className="flex items-center gap-1 p-1 rounded-xl" style={{ background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.07)" }}>
-            {["ALL", "IIT", "NIT", "IIIT", "GFTI"].map((tier) => (
-              <button
-                key={tier} onClick={() => setSelectedType(tier)}
-                className="text-xs font-bold px-3 py-1.5 rounded-lg cursor-pointer transition-all"
-                style={{
-                  background: selectedType === tier ? "#ffffff" : "transparent",
-                  color: selectedType === tier ? "#0a0a0a" : "#555555",
-                  boxShadow: selectedType === tier ? "0 2px 12px -3px rgba(255,255,255,0.15)" : "none",
-                }}
-              >
-                {tier}
-              </button>
-            ))}
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold shrink-0" style={{ color: "#444444" }}>Sort:</span>
-            <select
-              value={sortBy} onChange={(e) => setSortBy(e.target.value as any)}
-              className="text-xs rounded-xl px-2 py-1.5 cursor-pointer border"
-              style={{ background: "#1a1a1a", borderColor: "rgba(255,255,255,0.08)", color: "#888888" }}
-            >
-              <option value="fit">FIT Score</option>
-              <option value="package">Avg CTC</option>
-              <option value="fees">Lowest Fees</option>
-              <option value="safety">Admission Safety</option>
+        </section>
+
+        <section className="dashboard-controls" aria-label="Match controls">
+          <label className="dashboard-search-control">
+            <span className="sr-only">Search colleges or cities</span>
+            <Search size={18} aria-hidden="true" />
+            <input
+              type="search"
+              placeholder="Search colleges or cities"
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+            />
+          </label>
+
+          <label className="dashboard-select-control">
+            <span className="sr-only">Institute filter</span>
+            <select value={selectedType} onChange={(event) => setSelectedType(event.target.value as (typeof INSTITUTE_TYPES)[number])}>
+              {INSTITUTE_TYPES.map((type) => <option key={type} value={type}>{type === "ALL" ? "All institutes" : type}</option>)}
             </select>
-          </div>
-        </div>
+            <ChevronDown size={15} aria-hidden="true" />
+          </label>
 
-        {/* Compare banner */}
+          <label className="dashboard-select-control">
+            <span className="sr-only">Sort matches</span>
+            <select value={sortBy} onChange={(event) => setSortBy(event.target.value as SortKey)}>
+              <option value="fit">Best FIT</option>
+              <option value="package">Highest Average Package</option>
+              <option value="fees">Lowest Fees</option>
+              <option value="safety">Strongest Admission Safety</option>
+            </select>
+            <ChevronDown size={15} aria-hidden="true" />
+          </label>
+
+          <button type="button" className="dashboard-control-button" onClick={() => setWeightModalOpen(true)}>
+            <SlidersHorizontal size={17} aria-hidden="true" /> Tune weights
+          </button>
+          <Link href="/tuneweights" className="dashboard-quiet-button" style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+            <ExternalLink size={15} aria-hidden="true" /><span>Weights Studio</span>
+          </Link>
+          <button type="button" className="dashboard-quiet-button" onClick={() => generatePDF(filteredRecs.slice(0, 10), profile)}>
+            <Download size={16} aria-hidden="true" /><span>PDF report</span>
+          </button>
+        </section>
+
         {selectedCollegeIds.length > 0 && (
-          <div className="p-3 rounded-xl flex items-center justify-between text-xs font-semibold reveal-on-scroll" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.12)", color: "#aaaaaa" }}>
-            <div className="flex items-center gap-2">
-              <Star className="h-4 w-4" style={{ color: "#ffffff" }} />
-              {selectedCollegeIds.length} / 3 colleges selected for comparison matrix
-            </div>
-            <div className="flex items-center gap-4">
-              {selectedCollegeIds.length >= 2 && (
-                <Link href="/compare"><span className="underline font-bold cursor-pointer text-white">Compare Now →</span></Link>
-              )}
-              <button onClick={clearSelections} className="cursor-pointer" style={{ color: "#555555" }}>Clear</button>
+          <div className="dashboard-selection-bar" role="status">
+            <span>{selectedCollegeIds.length} of 3 colleges selected for comparison</span>
+            <div>
+              {selectedCollegeIds.length >= 2 && <Link href="/compare">Open comparison <ArrowRight size={14} aria-hidden="true" /></Link>}
+              <button type="button" onClick={clearSelections}>Clear</button>
             </div>
           </div>
         )}
 
-        {/* College cards */}
-        {filteredRecs.length === 0 ? (
-          <div className="glass-card p-16 text-center space-y-4 reveal-on-scroll">
-            <Building2 className="h-12 w-12 mx-auto" style={{ color: "#333333" }} />
-            <h3 className="font-bold text-lg text-white">No colleges match your filter criteria</h3>
-            <p className="text-xs" style={{ color: "#666666" }}>Try clearing your search query or selecting a different tier tab.</p>
+        <section className="dashboard-ranking" aria-labelledby="match-ranking-title">
+          <div className="dashboard-ranking-heading">
+            <p className="dashboard-eyebrow">Match ranking</p>
+            <h2 id="match-ranking-title">{resultLabel}</h2>
           </div>
-        ) : (
-          <div className="space-y-4">
-            {filteredRecs.map((rec, i) => {
-              const { college, matchedBranch, overallScore, breakdown, topReasons } = rec;
-              const isSel = selectedCollegeIds.includes(college.id);
 
-              return (
-                <div
-                  key={college.id}
-                  className="glass-card glass-card-hover reveal-on-scroll"
-                  style={{
-                    padding: "24px",
-                    transitionDelay: `${Math.min(i * 50, 300)}ms`,
-                    borderColor: isSel ? "rgba(255,255,255,0.22)" : "rgba(255,255,255,0.07)",
-                    background: isSel ? "rgba(255,255,255,0.04)" : undefined,
-                  }}
-                >
-                  <div className="flex flex-col sm:flex-row items-start justify-between gap-5">
-                    <div className="flex items-center gap-4 shrink-0">
-                      <div className="text-xs font-mono font-bold w-6 text-center" style={{ color: "#444444" }}>#{i + 1}</div>
-                      <ScoreRing score={overallScore} />
-                    </div>
+          {filteredRecs.length === 0 ? (
+            <div className="dashboard-empty-state">
+              <GraduationCap size={25} aria-hidden="true" />
+              <h3>No colleges match this filter.</h3>
+              <p>Try another search, institute filter, or sort order.</p>
+            </div>
+          ) : (
+            <div className="dashboard-recommendations">
+              {filteredRecs.map((rec, index) => {
+                const { college, matchedBranch, overallScore, breakdown, topReasons } = rec;
+                const selected = selectedCollegeIds.includes(college.id);
+                const compareAtLimit = !selected && selectedCollegeIds.length >= 3;
 
-                    <div className="flex-1 space-y-3">
-                      <div className="flex items-start justify-between gap-4">
-                        <div>
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <h3 className="text-base font-bold text-white">{college.name}</h3>
-                            <span className="badge-white text-[10px]">{college.type}</span>
-                            {college.nirfRank && <span className="badge-white text-[10px]">NIRF #{college.nirfRank}</span>}
-                          </div>
-                          <div className="flex items-center gap-3 text-xs mt-1 flex-wrap" style={{ color: "#555555" }}>
-                            <span className="flex items-center gap-1"><MapPin className="h-3 w-3" /> {college.city}, {college.state}</span>
-                            <span className="font-semibold px-2 py-0.5 rounded border text-[11px]" style={{ background: "rgba(255,255,255,0.05)", color: "#aaaaaa", borderColor: "rgba(255,255,255,0.1)" }}>
-                              {matchedBranch.name}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2 shrink-0">
-                          <label className="text-xs hidden sm:inline cursor-pointer" style={{ color: "#444444" }}>Compare</label>
-                          <Checkbox
-                            checked={isSel}
-                            onCheckedChange={() => toggleCollegeSelection(college.id)}
-                            className="border-[rgba(255,255,255,0.2)] data-[state=checked]:bg-white data-[state=checked]:border-white"
-                          />
-                        </div>
+                return (
+                  <article className="dashboard-recommendation" data-selected={selected} key={college.id}>
+                    <header className="dashboard-recommendation-header">
+                      <div className="dashboard-rank">
+                        <strong>{String(index + 1).padStart(2, "0")}</strong>
+                        <span>Match order</span>
                       </div>
 
-                      {/* Stats */}
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                        {[
-                          { label: "Total Fees", val: `₹${(college.fees / 100000).toFixed(1)}L` },
-                          { label: "Average CTC", val: `₹${college.avgPackageLPA} LPA` },
-                          { label: "Hostel", val: `${college.hostelRating} / 5` },
-                          { label: "Coding", val: `${college.codingCultureRating} / 5` },
-                        ].map((m) => (
-                          <div key={m.label} className="p-2 rounded-lg" style={{ background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.06)" }}>
-                            <div className="text-[9px] uppercase tracking-wider mb-0.5" style={{ color: "#444444" }}>{m.label}</div>
-                            <div className="text-xs font-bold font-mono text-white">{m.val}</div>
-                          </div>
-                        ))}
-                      </div>
-
-                      {topReasons.slice(0, 2).map((r, ri) => (
-                        <div key={ri} className="flex items-center gap-1.5 text-xs" style={{ color: "#777777" }}>
-                          <CheckCircle2 className="h-3.5 w-3.5 shrink-0" style={{ color: "#aaaaaa" }} />
-                          {r}
+                      <div className="dashboard-college-identity">
+                        <div className="dashboard-college-title-row">
+                          <h3>{college.name}</h3>
+                          {college.nirfRank ? <span>NIRF #{college.nirfRank}</span> : null}
                         </div>
-                      ))}
-
-                      <div className="flex justify-end pt-1">
-                        <button
-                          onClick={() => setDetailCollege(rec)}
-                          className="flex items-center gap-1 text-xs font-semibold cursor-pointer transition-all"
-                          style={{ color: "#555555" }}
-                          onMouseEnter={(e) => { e.currentTarget.style.color = "#ffffff"; }}
-                          onMouseLeave={(e) => { e.currentTarget.style.color = "#555555"; }}
-                        >
-                          Full Specifications &amp; Cutoffs
-                          <ChevronRight className="h-3.5 w-3.5" />
-                        </button>
+                        <p>{matchedBranch.name}</p>
+                        <small><MapPin size={14} aria-hidden="true" /> {college.city}, {college.state} <i aria-hidden="true">·</i> {college.type}</small>
                       </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
+
+                      <FitRing score={overallScore} />
+                    </header>
+
+                    <dl className="dashboard-recommendation-metrics">
+                      <div>
+                        <dt>Total tuition</dt>
+                        <dd>{formatLakhs(college.fees)}</dd>
+                      </div>
+                      <div>
+                        <dt>Average package</dt>
+                        <dd>₹{college.avgPackageLPA}L</dd>
+                      </div>
+                      <div>
+                        <dt>Admission safety</dt>
+                        <dd>{safetyLabel(breakdown.admissionSafety)}</dd>
+                      </div>
+                    </dl>
+
+                    <section className="dashboard-why-it-fits" aria-labelledby={"why-" + college.id}>
+                      <h4 id={"why-" + college.id}>Why it fits</h4>
+                      <ul>
+                        {topReasons.map((reason) => <li key={reason}>{reason}</li>)}
+                      </ul>
+                    </section>
+
+                    <footer className="dashboard-recommendation-actions">
+                      <button type="button" onClick={() => setDetailCollege(rec)}>View details <ChevronRight size={15} aria-hidden="true" /></button>
+                      <button
+                        type="button"
+                        className="dashboard-compare-action"
+                        data-selected={selected}
+                        disabled={compareAtLimit}
+                        onClick={() => toggleCollegeSelection(college.id)}
+                      >
+                        {selected ? <Check size={15} aria-hidden="true" /> : <GitCompareArrows size={15} aria-hidden="true" />}
+                        {selected ? "Added to compare" : compareAtLimit ? "Compare limit reached" : "Add to compare"}
+                      </button>
+                    </footer>
+                  </article>
+                );
+              })}
+            </div>
+          )}
+        </section>
       </div>
 
       <WeightTunerModal isOpen={weightModalOpen} onClose={() => setWeightModalOpen(false)} weights={weights} onSave={setWeights} />
       <CollegeDetailModal rec={detailCollege} onClose={() => setDetailCollege(null)} />
-    </div>
+    </main>
   );
 }
