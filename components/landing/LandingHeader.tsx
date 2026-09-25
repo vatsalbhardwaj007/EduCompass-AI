@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { Compass, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useState } from "react";
+import EduCompassBrand from "@/components/EduCompassBrand";
 import ThemeToggle from "@/components/landing/ThemeToggle";
 
 const navigation = [
@@ -17,16 +18,7 @@ export default function LandingHeader() {
   return (
     <header className="landing-header">
       <div className="landing-header-inner">
-        <Link href="/" className="landing-brand" aria-label="EduCompass home">
-          <span className="landing-brand-mark" aria-hidden="true">
-            <Compass size={19} strokeWidth={1.8} />
-          </span>
-          <span>
-            <span className="landing-brand-name">EduCompass</span>
-            <span className="landing-brand-descriptor">Smart engineering admissions</span>
-          </span>
-          <span className="landing-brand-badge">AI 2.0</span>
-        </Link>
+        <EduCompassBrand className="landing-brand" descriptor />
 
         <nav className="landing-desktop-nav" aria-label="Landing page navigation">
           {navigation.map((item) => (

@@ -9,7 +9,6 @@ import {
   Bot,
   User,
   Loader2,
-  Sparkles,
   Trash2,
 } from "lucide-react";
 import { useProfile } from "@/lib/ProfileContext";
@@ -354,29 +353,11 @@ export default function AIChatbot() {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-2xl flex items-center justify-center cursor-pointer transition-all duration-300 hover:scale-105 chatbot-fab"
-          style={{
-            background: "#ffffff",
-            boxShadow:
-              "0 8px 32px -6px rgba(255,255,255,0.25), 0 0 0 1px rgba(255,255,255,0.1)",
-          }}
+          className="chatbot-launcher"
           aria-label="Open AI Counsellor"
         >
-          <MessageSquareText className="h-6 w-6 text-black" />
-          <span
-            className="absolute -top-1 -right-1 h-4 w-4 rounded-full border-2 flex items-center justify-center"
-            style={{
-              borderColor: "#0a0a0a",
-              background: "#fff",
-            }}
-          >
-            <Sparkles
-              className="h-2 w-2"
-              style={{ color: "#0a0a0a" }}
-            />
-          </span>
-          {/* Pulse ring */}
-          <span className="absolute inset-0 rounded-2xl chatbot-fab-pulse" />
+          <MessageSquareText size={17} aria-hidden="true" />
+          <span>Ask EduCompass</span>
         </button>
       )}
 

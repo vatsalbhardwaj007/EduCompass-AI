@@ -2,12 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
-import EduCompassLogo from "@/components/EduCompassLogo";
+import ProductHeader from "@/components/ProductHeader";
 import {
-  Compass, ArrowLeft, Sparkles, Loader2,
+  Sparkles, Loader2,
   IndianRupee, TrendingUp, Home, Code2, Star,
-  BookOpen, Award, Bot, MapPin, Trophy,
+  Award, Bot, MapPin, Trophy,
 } from "lucide-react";
 import { useProfile } from "@/lib/ProfileContext";
 
@@ -79,105 +78,86 @@ export default function ComparePage() {
   const cols = selected.length;
 
   return (
-    <div className="relative min-h-screen pb-20" style={{ backgroundColor: "#0a0a0a", color: "#ffffff" }}>
-      <div className="pointer-events-none fixed inset-0 -z-10 bg-grid-pattern" style={{ opacity: 0.35 }} />
-      <div className="pointer-events-none fixed inset-0 -z-10" style={{ background: "radial-gradient(ellipse 80% 40% at 50% -5%, rgba(255,255,255,0.05) 0%, transparent 70%)" }} />
+    <main className="compare-v2">
+      <ProductHeader active="compare" returnHref="/dashboard" returnLabel="Back to matches" />
 
-      {/* Nav */}
-      <nav className="sticky top-0 z-40 glass-nav px-6 py-4 md:px-12 flex items-center justify-between">
-        <EduCompassLogo />
-        <Link href="/dashboard">
-          <button className="btn-outline px-4 py-2 text-sm cursor-pointer flex items-center gap-1.5">
-            <ArrowLeft className="h-4 w-4" /> Back to Dashboard
-          </button>
-        </Link>
-      </nav>
-
-      <div className="mx-auto max-w-6xl px-6 py-8 md:py-12 space-y-8">
+      <div className="compare-v2-shell">
         {/* Header */}
-        <div className="glass-card p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 reveal-on-scroll">
+        <header className="compare-v2-intro">
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <Trophy className="h-5 w-5 text-white" />
-              <span className="badge-white">{selected.length} Colleges Selected</span>
+            <div className="compare-v2-kicker">
+              <Trophy size={17} aria-hidden="true" />
+              <span>{selected.length} colleges selected</span>
             </div>
-            <h1 className="editorial-heading" style={{ fontSize: "clamp(1.5rem, 3vw, 2rem)" }}>
+            <h1>
               Head-to-Head Specification Matrix
             </h1>
-            <p className="text-xs mt-1" style={{ color: "#888888" }}>
+            <p>
               Side-by-side comparison across overall fit score, fees, placements, and ratings.
             </p>
           </div>
           <button
             onClick={generateAISummary} disabled={loadingSummary}
-            className="btn-accent flex items-center gap-2 px-5 py-2.5 text-xs cursor-pointer rounded-full"
+            className="compare-v2-primary-action"
           >
             {loadingSummary ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
             Generate AI Verdict
           </button>
-        </div>
+        </header>
 
         {/* AI Summary */}
         {aiSummary && (
-          <div className="glass-card p-6 space-y-3 reveal-on-scroll" style={{ borderColor: "rgba(255,255,255,0.14)", background: "rgba(255,255,255,0.03)" }}>
-            <div className="flex items-center gap-2.5">
-              <div className="h-8 w-8 rounded-xl flex items-center justify-center" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.14)" }}>
-                <Bot className="h-4 w-4 text-white" />
+          <section className="compare-v2-summary">
+            <div className="compare-v2-summary-heading">
+              <div>
+                <Bot size={16} aria-hidden="true" />
               </div>
-              <h3 className="font-bold text-sm text-white">AI Counsellor Comparative Verdict</h3>
+              <h2>AI Counsellor Comparative Verdict</h2>
             </div>
-            <div
-              className="text-xs leading-relaxed whitespace-pre-line rounded-xl p-4"
-              style={{ background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.07)", color: "#888888" }}
-            >
+            <div className="compare-v2-summary-copy">
               {aiSummary}
             </div>
-          </div>
+          </section>
         )}
 
         {/* College header columns */}
-        <div className="grid gap-4 reveal-on-scroll" style={{ gridTemplateColumns: `180px repeat(${cols}, 1fr)` }}>
-          <div className="flex items-end px-2 pb-2">
-            <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "#444444" }}>Comparison Factor</span>
+        <div className="compare-v2-table-scroll">
+          <div className="compare-v2-column-headings" style={{ gridTemplateColumns: `180px repeat(${cols}, minmax(220px, 1fr))` }}>
+            <div className="compare-v2-column-label">Comparison factor</div>
+            {selected.map((r) => (
+              <article key={r.college.id} className="compare-v2-college-card">
+                <span>{r.college.type}</span>
+                <h2>{r.college.name}</h2>
+                <p>{r.matchedBranch.name}</p>
+                <small><MapPin size={13} aria-hidden="true" /> {r.college.city}</small>
+              </article>
+            ))}
           </div>
-          {selected.map((r) => (
-            <div key={r.college.id} className="glass-card p-5 text-center space-y-2">
-              <span className="badge-white inline-block">{r.college.type}</span>
-              <h3 className="font-extrabold text-sm leading-tight text-white">{r.college.name}</h3>
-              <p className="text-[11px] font-semibold" style={{ color: "#888888" }}>{r.matchedBranch.name}</p>
-              <span className="text-[10px] flex items-center justify-center gap-1" style={{ color: "#555555" }}>
-                <MapPin className="h-3 w-3" /> {r.college.city}
-              </span>
-            </div>
-          ))}
         </div>
 
         {/* Spec table */}
-        <div className="glass-card overflow-hidden reveal-on-scroll">
+        <div className="compare-v2-table-scroll">
+          <div className="compare-v2-matrix" style={{ gridTemplateColumns: `180px repeat(${cols}, minmax(220px, 1fr))` }}>
           {metrics.map((metric, mIdx) => (
             <div
               key={metric.label}
-              className="grid items-center px-4 py-3.5 text-xs"
-              style={{
-                gridTemplateColumns: `180px repeat(${cols}, 1fr)`,
-                background: mIdx % 2 === 0 ? "rgba(255,255,255,0.015)" : "transparent",
-                borderTop: mIdx > 0 ? "1px solid rgba(255,255,255,0.05)" : "none",
-              }}
+              className="compare-v2-matrix-row"
+              data-striped={mIdx % 2 === 0}
             >
-              <div className="flex items-center gap-2 font-semibold" style={{ color: "#777777" }}>
-                <metric.icon className="h-4 w-4 flex-shrink-0 text-white" />
+              <div className="compare-v2-metric-label">
+                <metric.icon size={16} aria-hidden="true" />
                 {metric.label}
               </div>
               {metric.values.map((val, idx) => {
                 const isBest = getBestClass(metric.values, idx, metric.higher);
                 return (
-                  <div key={idx} className="text-center font-mono">
+                  <div key={idx} className="compare-v2-metric-value">
                     {isBest ? (
-                      <span className="inline-block px-2.5 py-1 rounded-lg font-extrabold text-black" style={{ background: "#ffffff" }}>
+                      <span className="compare-v2-best">
                         {metric.format(val)}
                       </span>
                     ) : (
-                      <span style={{ color: "#666666", fontWeight: 500 }}>{metric.format(val)}</span>
+                      <span>{metric.format(val)}</span>
                     )}
                   </div>
                 );
@@ -186,8 +166,8 @@ export default function ComparePage() {
           ))}
 
           {/* Score breakdown header */}
-          <div className="px-4 py-3" style={{ borderTop: "1px solid rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.03)" }}>
-            <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "#888888" }}>Factor Breakdown Ratings (0 — 100)</span>
+          <div className="compare-v2-breakdown-heading">
+            <span>Factor breakdown ratings (0 — 100)</span>
           </div>
 
           {scoreMetrics.map((metric, mIdx) => {
@@ -195,24 +175,20 @@ export default function ComparePage() {
             return (
               <div
                 key={metric.label}
-                className="grid items-center px-4 py-3.5 text-xs"
-                style={{
-                  gridTemplateColumns: `180px repeat(${cols}, 1fr)`,
-                  background: mIdx % 2 === 0 ? "rgba(255,255,255,0.015)" : "transparent",
-                  borderTop: "1px solid rgba(255,255,255,0.05)",
-                }}
+                className="compare-v2-matrix-row"
+                data-striped={mIdx % 2 === 0}
               >
-                <div className="font-medium" style={{ color: "#777777" }}>{metric.label}</div>
+                <div className="compare-v2-metric-label">{metric.label}</div>
                 {values.map((val, idx) => {
                   const isBest = getBestClass(values, idx, true);
                   return (
-                    <div key={idx} className="text-center font-mono">
+                    <div key={idx} className="compare-v2-metric-value">
                       {isBest ? (
-                        <span className="inline-block px-2.5 py-1 rounded-lg font-extrabold text-black" style={{ background: "#ffffff" }}>
+                        <span className="compare-v2-best">
                           {Math.round(val)} / 100
                         </span>
                       ) : (
-                        <span style={{ color: "#666666", fontWeight: 500 }}>{Math.round(val)} / 100</span>
+                        <span>{Math.round(val)} / 100</span>
                       )}
                     </div>
                   );
@@ -220,12 +196,13 @@ export default function ComparePage() {
               </div>
             );
           })}
+          </div>
         </div>
 
-        <p className="text-center text-xs" style={{ color: "#444444" }}>
+        <p className="compare-v2-disclaimer">
           ⚠️ Data shown is illustrative sample data for demo purposes only.
         </p>
       </div>
-    </div>
+    </main>
   );
 }

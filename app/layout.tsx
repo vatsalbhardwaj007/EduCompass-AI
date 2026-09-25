@@ -3,7 +3,7 @@ import "./globals.css";
 import { ProfileProvider } from "@/lib/ProfileContext";
 import AIChatbot from "@/components/AIChatbot";
 import ScrollRevealInit from "@/lib/ScrollRevealInit";
-import LogoAnimation from "@/lib/LogoAnimation";
+import PageTransition from "@/components/PageTransition";
 
 export const metadata: Metadata = {
   title: "EduCompass AI — Find Your Best-Fit Engineering College",
@@ -36,20 +36,13 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <ProfileProvider>
-          {children}
+          <PageTransition>{children}</PageTransition>
           <AIChatbot />
         </ProfileProvider>
 
         {/* Scroll reveal: wakes up .reveal-on-scroll elements as they enter viewport */}
         <ScrollRevealInit />
 
-        {/*
-         * Logo writing animation:
-         * Renders as a fixed overlay above all content.
-         * Plays once per full page load (layout doesn't remount on SPA nav).
-         * Respects prefers-reduced-motion.
-         */}
-        <LogoAnimation />
       </body>
     </html>
   );

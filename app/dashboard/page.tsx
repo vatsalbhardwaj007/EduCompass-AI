@@ -19,6 +19,7 @@ import {
   X,
 } from "lucide-react";
 import ThemeToggle from "@/components/landing/ThemeToggle";
+import EduCompassBrand from "@/components/EduCompassBrand";
 import { useProfile } from "@/lib/ProfileContext";
 import {
   DEFAULT_WEIGHTS,
@@ -307,10 +308,7 @@ export default function DashboardPage() {
     <main className="dashboard-v2">
       <nav className="dashboard-nav" aria-label="Dashboard navigation">
         <div className="dashboard-nav-inner">
-          <Link className="dashboard-brand" href="/" aria-label="EduCompass home">
-            <span className="dashboard-brand-mark" aria-hidden="true"><GraduationCap size={17} /></span>
-            <span>EduCompass</span>
-          </Link>
+          <EduCompassBrand className="dashboard-brand" />
 
           <div className="dashboard-desktop-links">
             <a href="#overview">Overview</a>
