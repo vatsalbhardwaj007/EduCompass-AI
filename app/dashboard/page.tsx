@@ -7,7 +7,7 @@ import EduCompassLogo from "@/components/EduCompassLogo";
 import {
   Compass, ArrowLeft, GitCompareArrows, Download, MessageSquareText,
   MapPin, IndianRupee, TrendingUp, Building2, CheckCircle2, Star,
-  Code2, Home, X, Send, Bot, User, Loader2, Sliders, Search, ChevronRight,
+  Code2, Home, X, Send, Bot, User, Loader2, Sliders, Search, ChevronRight, ExternalLink,
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -195,9 +195,17 @@ function WeightTunerModal({
             <Sliders className="h-5 w-5 text-white" />
             <h2 className="font-bold text-base text-white">Live Factor Weight Customizer</h2>
           </div>
-          <button onClick={onClose} className="h-8 w-8 rounded-lg flex items-center justify-center cursor-pointer" style={{ color: "#666666" }}>
-            <X className="h-4 w-4" />
-          </button>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/tuneweights"
+              className="text-xs text-neutral-400 hover:text-white flex items-center gap-1 transition-colors px-2.5 py-1 rounded-full border border-white/10 hover:border-white/30"
+            >
+              <ExternalLink className="h-3 w-3" /> Full Studio Page
+            </Link>
+            <button onClick={onClose} className="h-8 w-8 rounded-lg flex items-center justify-center cursor-pointer hover:bg-white/10" style={{ color: "#888888" }}>
+              <X className="h-4 w-4" />
+            </button>
+          </div>
         </div>
 
         {/* Presets */}

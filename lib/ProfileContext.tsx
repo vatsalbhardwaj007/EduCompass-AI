@@ -50,9 +50,9 @@ const getInitialProfile = (): StudentProfile => {
 };
 
 export function ProfileProvider({ children }: { children: React.ReactNode }) {
-  const [profile, setProfileState] = useState<StudentProfile>(getInitialProfile);
+  const [profile, setProfileState] = useState<StudentProfile>(DEFAULT_DEMO_PROFILE);
   const [recommendations, setRecommendations] = useState<RecommendedCollege[]>(() => 
-    getRecommendations(getInitialProfile(), colleges, DEFAULT_WEIGHTS)
+    getRecommendations(DEFAULT_DEMO_PROFILE, colleges, DEFAULT_WEIGHTS)
   );
   const [selectedCollegeIds, setSelectedCollegeIds] = useState<string[]>([]);
   const [weights, setWeightsState] = useState<ScoringWeights>(DEFAULT_WEIGHTS);
@@ -65,12 +65,21 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
     []
   );
 
-  // Sync profile & recommendations on mount / change
+  // Sync profile & recommendations on client mount from localStorage
   useEffect(() => {
-    const initial = getInitialProfile();
-    setProfileState(initial);
-    calculateRecommendations(initial, weights);
-  }, [calculateRecommendations, weights]);
+    try {
+      const saved = localStorage.getItem("educompass_profile");
+      if (saved) {
+        const parsed = JSON.parse(saved) as StudentProfile;
+        setProfileState(parsed);
+        calculateRecommendations(parsed, weights);
+        return;
+      }
+    } catch {
+      // fallback
+    }
+    calculateRecommendations(DEFAULT_DEMO_PROFILE, weights);
+  }, [calculateRecommendations]);
 
   const setProfile = useCallback(
     (p: StudentProfile) => {
