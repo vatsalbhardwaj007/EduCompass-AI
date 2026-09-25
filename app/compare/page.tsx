@@ -12,15 +12,20 @@ import { useProfile } from "@/lib/ProfileContext";
 
 export default function ComparePage() {
   const router = useRouter();
-  const { profile, recommendations, selectedCollegeIds } = useProfile();
+  const { profile, isProfileReady, recommendations, selectedCollegeIds } = useProfile();
   const [aiSummary, setAiSummary] = useState<string | null>(null);
   const [loadingSummary, setLoadingSummary] = useState(false);
 
   useEffect(() => {
-    if (!profile || selectedCollegeIds.length < 2) router.push("/dashboard");
-  }, [profile, selectedCollegeIds, router]);
+    if (!isProfileReady) return;
+    if (!profile) {
+      router.replace("/profile");
+      return;
+    }
+    if (selectedCollegeIds.length < 2) router.replace("/dashboard");
+  }, [isProfileReady, profile, selectedCollegeIds, router]);
 
-  if (!profile || selectedCollegeIds.length < 2) return null;
+  if (!isProfileReady || !profile || selectedCollegeIds.length < 2) return null;
 
   const selected = recommendations.filter((r) => selectedCollegeIds.includes(r.college.id));
 

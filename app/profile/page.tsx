@@ -47,18 +47,26 @@ const profileSteps = [
 ] as const;
 
 export default function ProfilePage() {
-  const router = useRouter();
-  const { setProfile, profile: existingProfile } = useProfile();
+  const { profile: existingProfile, isProfileReady } = useProfile();
 
-  const [jeeMainRank, setJeeMainRank] = useState(existingProfile?.jeeMainRank ? String(existingProfile.jeeMainRank) : "5000");
-  const [jeeAdvancedRank, setJeeAdvancedRank] = useState(existingProfile?.jeeAdvancedRank ? String(existingProfile.jeeAdvancedRank) : "500");
-  const [category, setCategory] = useState<Category>(existingProfile?.category || "general");
-  const [gender, setGender] = useState<StudentProfile["gender"]>(existingProfile?.gender || "male");
-  const [homeState, setHomeState] = useState(existingProfile?.homeState || "Delhi");
-  const [budget, setBudget] = useState(existingProfile?.budget ? String(existingProfile.budget) : "1200000");
-  const [hostelNeeded, setHostelNeeded] = useState(existingProfile?.hostelNeeded !== undefined ? existingProfile.hostelNeeded : true);
+  if (!isProfileReady) return null;
+
+  return <ProfileForm existingProfile={existingProfile} />;
+}
+
+function ProfileForm({ existingProfile }: { existingProfile: StudentProfile | null }) {
+  const router = useRouter();
+  const { setProfile } = useProfile();
+
+  const [jeeMainRank, setJeeMainRank] = useState(existingProfile ? String(existingProfile.jeeMainRank) : "");
+  const [jeeAdvancedRank, setJeeAdvancedRank] = useState(existingProfile?.jeeAdvancedRank ? String(existingProfile.jeeAdvancedRank) : "");
+  const [category, setCategory] = useState<Category | "">(existingProfile?.category ?? "");
+  const [gender, setGender] = useState<StudentProfile["gender"] | "">(existingProfile?.gender ?? "");
+  const [homeState, setHomeState] = useState(existingProfile?.homeState ?? "");
+  const [budget, setBudget] = useState(existingProfile ? String(existingProfile.budget) : "");
+  const [hostelNeeded, setHostelNeeded] = useState<boolean | null>(existingProfile?.hostelNeeded ?? null);
   const [preferredBranches, setPreferredBranches] = useState<string[]>(existingProfile?.preferredBranches || []);
-  const [careerGoal, setCareerGoal] = useState<CareerGoal>(existingProfile?.careerGoal || "high_package");
+  const [careerGoal, setCareerGoal] = useState<CareerGoal | "">(existingProfile?.careerGoal ?? "");
   const [branchSearch, setBranchSearch] = useState("");
 
   const toggleBranch = (branch: string) => {
@@ -75,6 +83,8 @@ export default function ProfilePage() {
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (!isValid || category === "" || gender === "" || hostelNeeded === null || careerGoal === "") return;
+
     const profile: StudentProfile = {
       jeeMainRank: parseInt(jeeMainRank),
       jeeAdvancedRank: jeeAdvancedRank ? parseInt(jeeAdvancedRank) : null,
@@ -92,7 +102,9 @@ export default function ProfilePage() {
   };
 
   const isValid = Boolean(
-    jeeMainRank && parseInt(jeeMainRank) > 0 && budget && parseInt(budget) > 0 && homeState
+    jeeMainRank && parseInt(jeeMainRank) > 0
+    && budget && parseInt(budget) > 0
+    && category && gender && homeState && hostelNeeded !== null && careerGoal
   );
   const budgetInLakhs = parseInt(budget) / 100000;
 
@@ -173,8 +185,10 @@ export default function ProfilePage() {
                 id="category"
                 className="profile-field"
                 value={category}
-                onChange={(event) => setCategory(event.target.value as Category)}
+                required
+                onChange={(event) => setCategory(event.target.value as Category | "")}
               >
+                <option value="" disabled>Select category</option>
                 <option value="general">General (OPEN)</option>
                 <option value="obc">OBC-NCL</option>
                 <option value="sc">Scheduled Caste (SC)</option>
@@ -219,7 +233,8 @@ export default function ProfilePage() {
                     <input
                       type="radio"
                       name="hostelNeeded"
-                      checked={hostelNeeded}
+                      required
+                      checked={hostelNeeded === true}
                       onChange={() => setHostelNeeded(true)}
                     />
                     <span>Require hostel</span>
@@ -228,7 +243,7 @@ export default function ProfilePage() {
                     <input
                       type="radio"
                       name="hostelNeeded"
-                      checked={!hostelNeeded}
+                      checked={hostelNeeded === false}
                       onChange={() => setHostelNeeded(false)}
                     />
                     <span>Day scholar</span>
@@ -287,8 +302,10 @@ export default function ProfilePage() {
                   id="gender"
                   className="profile-field"
                   value={gender}
-                  onChange={(event) => setGender(event.target.value as StudentProfile["gender"])}
+                  required
+                  onChange={(event) => setGender(event.target.value as StudentProfile["gender"] | "")}
                 >
+                  <option value="" disabled>Select gender</option>
                   <option value="male">Male</option>
                   <option value="female">Female</option>
                   <option value="other">Other</option>
@@ -329,6 +346,7 @@ export default function ProfilePage() {
                       name="careerGoal"
                       value={goal}
                       checked={selected}
+                      required
                       onChange={() => setCareerGoal(goal)}
                     />
                     <span>{label}</span>
@@ -344,7 +362,7 @@ export default function ProfilePage() {
               Calculate my FIT matches <ArrowRight size={18} aria-hidden="true" />
             </button>
             {!isValid && (
-              <p role="status">Enter a JEE Main rank, budget, and home state to continue.</p>
+              <p role="status">Complete the required profile fields to continue.</p>
             )}
           </div>
         </form>

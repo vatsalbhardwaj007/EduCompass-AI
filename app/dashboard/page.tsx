@@ -263,6 +263,7 @@ export default function DashboardPage() {
   const router = useRouter();
   const {
     profile,
+    isProfileReady,
     recommendations,
     selectedCollegeIds,
     toggleCollegeSelection,
@@ -278,8 +279,8 @@ export default function DashboardPage() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
-    if (!profile) router.push("/profile");
-  }, [profile, router]);
+    if (isProfileReady && !profile) router.replace("/profile");
+  }, [isProfileReady, profile, router]);
 
   const filteredRecs = useMemo(() => recommendations
     .filter((rec) => {
@@ -294,7 +295,7 @@ export default function DashboardPage() {
       return right.overallScore - left.overallScore;
     }), [recommendations, searchQuery, selectedType, sortBy]);
 
-  if (!profile) return null;
+  if (!isProfileReady || !profile) return null;
 
   const topRecommendation = recommendations[0];
   const preferredBranches = profile.preferredBranches.length

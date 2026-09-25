@@ -4,7 +4,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowDownRight } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import ProductPreview from "@/components/landing/ProductPreview";
 
 const clamp = (value: number) => Math.min(1, Math.max(0, value));
 const range = (value: number, start: number, end: number) =>
@@ -196,12 +195,11 @@ export default function ScrollLaptopExperience() {
       drawFrame(selectedFrame);
 
       const displayTakeover = range(progress, 0.68, 0.72);
-      const screenTakeover = range(progress, 0.72, 0.84);
-      const screenSurface = range(progress, 0.72, 0.84);
-      const headlineIn = range(progress, 0.87, 0.905);
-      const supportIn = range(progress, 0.895, 0.925);
-      const messageOut = range(progress, 0.94, 0.965);
-      const preview = range(progress, 0.965, 0.995);
+      const screenTakeover = range(progress, 0.72, 0.82);
+      const screenSurface = range(progress, 0.72, 0.82);
+      const headlineIn = range(progress, 0.84, 0.865);
+      const supportIn = range(progress, 0.862, 0.885);
+      const messageOut = range(progress, 0.93, 0.95);
 
       // The sequence stays visible while the calibrated screen plane grows into DOM.
       section.style.setProperty("--laptop-sequence-scale", `${1 + displayTakeover * 0.35}`);
@@ -211,12 +209,9 @@ export default function ScrollLaptopExperience() {
       section.style.setProperty("--hero-copy-y", `${-16 * range(progress, 0.16, 0.34)}px`);
       section.style.setProperty("--screen-canvas-opacity", `${screenSurface}`);
       section.style.setProperty("--experience-headline-opacity", `${headlineIn * (1 - messageOut)}`);
-      section.style.setProperty("--experience-headline-y", `${20 * (1 - headlineIn) - 6 * messageOut}px`);
+      section.style.setProperty("--experience-headline-y", `${20 * (1 - headlineIn) - 10 * messageOut}px`);
       section.style.setProperty("--experience-support-opacity", `${supportIn * (1 - messageOut)}`);
-      section.style.setProperty("--experience-support-y", `${16 * (1 - supportIn) - 4 * messageOut}px`);
-      section.style.setProperty("--preview-opacity", `${preview}`);
-      section.style.setProperty("--preview-y", `${14 * (1 - preview)}px`);
-      section.style.setProperty("--preview-scale", `${0.985 + preview * 0.015}`);
+      section.style.setProperty("--experience-support-y", `${16 * (1 - supportIn) - 8 * messageOut}px`);
       updateHandoffGeometry(screenTakeover);
     };
 
@@ -237,8 +232,8 @@ export default function ScrollLaptopExperience() {
 
     const updateProgressTarget = () => {
       const availableDistance = Math.max(sectionHeight - viewportHeight, 1);
-      // Finish before sticky release, leaving a stable full-screen product hold.
-      targetProgress = clamp((window.scrollY - sectionTop) / (availableDistance * 0.84));
+      // Finish just before sticky release, leaving a short deliberate dark-screen hold.
+      targetProgress = clamp((window.scrollY - sectionTop) / (availableDistance * 0.94));
       if (animationFrame === null) animationFrame = window.requestAnimationFrame(animateToTarget);
     };
 
@@ -256,7 +251,7 @@ export default function ScrollLaptopExperience() {
       preloadBackgroundFrames();
     }, 700);
     const availableDistance = Math.max(sectionHeight - viewportHeight, 1);
-    targetProgress = clamp((window.scrollY - sectionTop) / (availableDistance * 0.84));
+    targetProgress = clamp((window.scrollY - sectionTop) / (availableDistance * 0.94));
     displayProgress = targetProgress;
     updateScene(displayProgress);
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -304,9 +299,6 @@ export default function ScrollLaptopExperience() {
             <div className="landing-experience-message" aria-hidden="true">
               <h2>See the full picture.</h2>
               <p>Compare what matters before you choose.</p>
-            </div>
-            <div className="landing-preview-stage">
-              <ProductPreview />
             </div>
           </div>
         </div>
