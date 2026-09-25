@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
 
 /**
  * LogoAnimation
@@ -14,6 +15,7 @@ import { useEffect, useRef } from "react";
  */
 export default function LogoAnimation() {
   const overlayRef = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
 
   useEffect(() => {
     const el = overlayRef.current;
@@ -28,7 +30,8 @@ export default function LogoAnimation() {
       document.body.classList.add("logo-animation-done");
     };
 
-    if (prefersReduced) {
+    // Only play animation on the landing page
+    if (pathname !== "/" || prefersReduced) {
       finishCompletely();
       return;
     }
@@ -67,7 +70,7 @@ export default function LogoAnimation() {
       el.removeEventListener("transitionend", handleTransitionEnd);
       finishCompletely();
     };
-  }, []);
+  }, [pathname]);
 
   const handleSkip = () => {
     const el = overlayRef.current;
