@@ -42,7 +42,6 @@ export default function RootLayout({
 
         {/* Scroll reveal: wakes up .reveal-on-scroll elements as they enter viewport */}
         <ScrollRevealInit />
-
       </body>
     </html>
   );
