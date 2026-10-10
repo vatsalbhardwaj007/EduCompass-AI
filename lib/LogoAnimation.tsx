@@ -1,21 +1,12 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 
-/**
- * LogoAnimation
- *
- * Flow:
- * 1. Overlay (black #0a0a0a) covers page. Body scroll locked.
- * 2. Yellow cursive "EduCompass" + "AI 2.0" badge pops in (0 → ~1.2s).
- * 3. At 2.2s: overlay gets `.logo-transitioning` → CSS opacity transition to 0 (1.2s).
- *             Landing page simultaneously fades in.
- * 4. On `transitionend`: overlay gets `.logo-done` → display:none. Scroll unlocked.
- */
 export default function LogoAnimation() {
   const overlayRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
+  const [visible, setVisible] = useState(true);
 
   useEffect(() => {
     const el = overlayRef.current;
@@ -24,7 +15,7 @@ export default function LogoAnimation() {
     const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     const finishCompletely = () => {
-      el.classList.add("logo-done");
+      setVisible(false);
       document.body.classList.remove("logo-anim-active");
       document.body.classList.remove("logo-page-opening");
       document.body.classList.add("logo-animation-done");
@@ -66,31 +57,19 @@ export default function LogoAnimation() {
     return () => {
       clearTimeout(t1);
       clearTimeout(fallback);
-      el.removeEventListener("transitionend", handleTransitionEnd);
+      if (el) el.removeEventListener("transitionend", handleTransitionEnd);
       finishCompletely();
     };
   }, []);
 
   const handleSkip = () => {
-    const el = overlayRef.current;
-    if (!el) return;
-    document.body.classList.add("logo-page-opening");
-    el.classList.add("logo-transitioning");
-
-    const onEnd = (e: TransitionEvent) => {
-      if (e.target === el && e.propertyName === "opacity") {
-        el.classList.add("logo-done");
-        document.body.classList.remove("logo-anim-active");
-        document.body.classList.remove("logo-page-opening");
-        document.body.classList.add("logo-animation-done");
-        el.removeEventListener("transitionend", onEnd);
-      }
-    };
-    el.addEventListener("transitionend", onEnd);
+    setVisible(false);
+    document.body.classList.remove("logo-anim-active");
+    document.body.classList.remove("logo-page-opening");
+    document.body.classList.add("logo-animation-done");
   };
 
-  // The landing page owns its cinematic opening; preserve the existing intro for product routes.
-  if (pathname === "/") return null;
+  if (pathname === "/" || !visible) return null;
 
   return (
     <div

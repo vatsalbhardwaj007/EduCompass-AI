@@ -502,25 +502,6 @@ body.logo-anim-active {
   overflow: hidden !important;
 }
 
-/*
- * Landing page content:
- * Hidden while the overlay is covering it.
- * Fades in gracefully once .logo-page-opening is added.
- */
-body.logo-anim-active:not(.logo-page-opening):not(.logo-animation-done) > div:not(.logo-anim-overlay) {
-  opacity: 0;
-  transform: translateY(8px);
-  pointer-events: none;
-}
-
-body.logo-page-opening > div:not(.logo-anim-overlay),
-body.logo-animation-done > div:not(.logo-anim-overlay) {
-  opacity: 1;
-  transform: translateY(0);
-  transition: opacity 1.0s cubic-bezier(0.22, 1, 0.36, 1) 0.1s,
-              transform 1.0s cubic-bezier(0.22, 1, 0.36, 1) 0.1s;
-}
-
 /* ── Overlay (full-screen intro curtain) ───────────────────*/
 .logo-anim-overlay {
   position: fixed;

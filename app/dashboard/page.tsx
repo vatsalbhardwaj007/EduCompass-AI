@@ -16,6 +16,7 @@ import {
   Menu,
   Search,
   SlidersHorizontal,
+  ExternalLink,
   X,
 } from "lucide-react";
 import ThemeToggle from "@/components/landing/ThemeToggle";
@@ -130,9 +131,19 @@ function WeightTunerModal({
             <p className="dashboard-eyebrow">Recommendation inputs</p>
             <h2 id="tune-weights-title">Tune what matters most.</h2>
           </div>
-          <button className="dashboard-icon-button" type="button" onClick={onClose} aria-label="Close tune weights">
-            <X size={18} aria-hidden="true" />
-          </button>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <Link
+              href="/tuneweights"
+              onClick={onClose}
+              className="dashboard-small-button"
+              style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
+            >
+              <ExternalLink size={14} /> Full Studio Page
+            </Link>
+            <button className="dashboard-icon-button" type="button" onClick={onClose} aria-label="Close tune weights">
+              <X size={18} aria-hidden="true" />
+            </button>
+          </div>
         </header>
 
         <p className="dashboard-modal-copy">Adjusting one factor recalculates the same deterministic FIT score using your existing preferences.</p>
@@ -427,6 +438,9 @@ export default function DashboardPage() {
           <button type="button" className="dashboard-control-button" onClick={() => setWeightModalOpen(true)}>
             <SlidersHorizontal size={17} aria-hidden="true" /> Tune weights
           </button>
+          <Link href="/tuneweights" className="dashboard-quiet-button" style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+            <ExternalLink size={15} aria-hidden="true" /><span>Weights Studio</span>
+          </Link>
           <button type="button" className="dashboard-quiet-button" onClick={() => generatePDF(filteredRecs.slice(0, 10), profile)}>
             <Download size={16} aria-hidden="true" /><span>PDF report</span>
           </button>
